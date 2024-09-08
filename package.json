@@ -1,0 +1,27 @@
+{
+  "name": "medical",
+  "version": "1.0.0",
+  "description": "booking medical onnline",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon --inspect src/index.js",
+    "pre-commit": "lint-staged",
+    "watch": "sass --watch src/resources/scss/index.scss src/public/css/index.css",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-handlebars": "^8.0.1",
+    "method-override": "^3.0.0",
+    "mongoose": "^8.6.1",
+    "morgan": "^1.10.0",
+    "node-sass": "^9.0.0",
+    "nodemon": "^3.1.4",
+    "sass": "^1.78.0"
+  }
+}
