@@ -1,6 +1,6 @@
 class homeController {
   index(req, res, next) {
-    res.send('đây là rtrang home');
+    res.send('đây là trang home');
   }
 }
 
