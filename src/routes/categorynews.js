@@ -3,10 +3,10 @@ const router = express.Router();
 const categoryController = require('../controllers/categorynewsController');
 
 // Định nghĩa các route cho CRUD thể loại
-router.get('/categorynews', categoryController.getAllCategories);        
-router.get('/categorynews/:id', categoryController.getCategoryById);      
-router.post('/categorynews', categoryController.createCategory);         
-router.put('/categorynews/:id', categoryController.updateCategory);       
-router.delete('/categorynews/:id', categoryController.deleteCategory);    
+router.get('/', categoryController.getAllCategories);        
+router.get('/:id', categoryController.getCategoryById);      
+router.post('/', categoryController.createCategory);         
+router.put('/:id', categoryController.updateCategory);       
+router.delete('/:id', categoryController.deleteCategory);    
 
 module.exports = router;
