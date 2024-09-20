@@ -4,7 +4,7 @@ const CategoryNews = require('../models/CategoryNews');
 
 exports.getAllPosts = async (req, res) => {
   try {
-    const posts = await NewsPost.find();
+    const posts = await NewsPost.find().populate('category');
     res.json(posts);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -100,12 +100,20 @@ exports.deletePost = async (req, res) => {
 
 exports.getPostsByCategory = async (req, res) => {
   try {
-    const categoryId = req.params.categoryId;
-    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
-      return res.status(400).json({ message: 'Invalid category ID' });
+    const categorySlug = req.params.categorySlug; // Nhận slug từ tham số URL
+
+    if (!categorySlug) {
+      return res.status(400).json({ message: 'Category slug is required' });
     }
 
-    const posts = await NewsPost.find({ category: categoryId });
+    // Tìm kiếm category theo slug
+    const category = await CategoryNews.findOne({ slug: categorySlug });
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+
+    // Tìm kiếm các bài viết theo ID của category
+    const posts = await NewsPost.find({ category: category._id });
     if (posts.length === 0) {
       return res.status(404).json({ message: 'No posts found for this category' });
     }

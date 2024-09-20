@@ -3,7 +3,10 @@ const mongoose = require('mongoose');
 
 async function Connect() {
   try {
-    await mongoose.connect('mongodb://localhost:27017/medical');
+    // await mongoose.connect('mongodb://localhost:27017/medical');
+    await mongoose.connect(
+      'mongodb+srv://root:123@db-medical.5qlch.mongodb.net/db-medical?retryWrites=true&w=majority&appName=db-medical',
+    );
     console.log('Connect successful');
   } catch (error) {
     console.log('Connect Failure');

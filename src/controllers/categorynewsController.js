@@ -28,7 +28,7 @@ exports.getCategoryById = async (req, res) => {
 exports.createCategory = async (req, res) => {
   try {
     const { name, description } = req.body;
-    
+
     if (!name) {
       return res.status(400).json({ message: 'Name is required' });
     }
@@ -51,9 +51,11 @@ exports.updateCategory = async (req, res) => {
     }
 
     const { name, description } = req.body;
-
     const updateFields = { name, description, updatedAt: new Date() };
-    Object.keys(updateFields).forEach(key => updateFields[key] === undefined && delete updateFields[key]);
+
+    Object.keys(updateFields).forEach(
+      (key) => updateFields[key] === undefined && delete updateFields[key]
+    );
 
     const updatedCategory = await CategoryNews.findByIdAndUpdate(id, updateFields, { new: true });
 
