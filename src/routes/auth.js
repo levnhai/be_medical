@@ -6,6 +6,8 @@ const router = express.Router();
 
 router.post('/signup', authController.signup);
 router.post('/login', authController.login);
+router.post('/google-login', authController.googleLogin);
+router.post('/facebook-login', authController.facebookLogin);
 
 // Route cho tất cả các user đã đăng nhập
 router.get('/profile', authMiddleware.protect, (req, res) => {
