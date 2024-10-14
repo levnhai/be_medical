@@ -3,9 +3,11 @@ const newsRouter = require('./news');
 const categorynewsRouter = require('./categorynews');
 const registrationRoutes = require('./registration');
 const bookingRoutes = require('./booking');
+const authRoutes = require('./auth');
 
 function route(app) {
   app.use('/', homeRouter);
+  app.use('/auth', authRoutes);
   app.use('/news', newsRouter);
   app.use('/categorynews', categorynewsRouter);
   app.use('/registrations', registrationRoutes);

@@ -1,23 +1,50 @@
 const _ = require('lodash');
-const DocterDb = require('../app/Models/Docter');
-const ProvinceDb = require('../app/Models/province');
-const ScheduleDb = require('../app/Models/Schedules');
-const AllCodeDb = require('../app/Models/allcode');
 const bcrypt = require('bcryptjs');
 const salt = bcrypt.genSaltSync(10);
 const MAX_NUMBER_SCHEDULE = 10;
+const dotenv = require('dotenv');
 
-const handleCheckPhoneExists = (phoneNumberInput) => {
+const UserDb = require('../models/user');
+
+// handle check phone exitst
+const handleCheckPhoneExists = (phoneNumber) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let isCheckPhoneExists = await DocterDb.findOne({
-        phoneNumber: phoneNumberInput,
+      let isCheckPhoneExists = await UserDb.findOne({
+        phoneNumber: phoneNumber,
       });
 
       if (isCheckPhoneExists) {
-        resolve(true);
+        resolve({ code: 409, message: 'Số điện thoại đã tồn tại', exists: true });
       } else {
-        resolve(false);
+        resolve({ code: 200, message: 'Số điện thoại chưa tồn tại', exists: false });
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+// handle Login user
+const handleLogin = () => {
+  return new Promise(async (resolve, reject) => {
+    try {
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+// handle Send otp input
+const handleSendotpInput = (phoneNumber) => {
+  return new Promise(async (resolve, reject) => {
+    console.log('check phoneNumber', phoneNumber);
+    try {
+      const randomOtp = generateOTP();
+      if (randomOtp) {
+        resolve({ message: 'random otp thành công', errCode: 0, otpInput: randomOtp, status: 'success' });
+      } else {
+        resolve({ message: 'random otp thất bại', errCode: 1, otpInput: {}, status: 'failure' });
       }
     } catch (error) {
       reject(error);
@@ -111,8 +138,22 @@ const bulkCreateSchedule = async (data) => {
     }
   });
 };
+
+// tạo 1 otp ngẫu nhiên 6 số
+const generateOTP = () => {
+  const digits = '0123456789';
+  let OTP = '';
+  for (let i = 0; i < 6; i++) {
+    OTP += digits[Math.floor(Math.random() * 10)];
+  }
+  return OTP;
+};
+
 module.exports = {
   getAllProvince,
   getAllCodeDataByType,
   bulkCreateSchedule,
+  handleCheckPhoneExists,
+  handleLogin,
+  handleSendotpInput,
 };

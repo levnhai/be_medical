@@ -63,9 +63,20 @@ exports.updatePost = async (req, res) => {
       }
     }
 
-    const updateFields = { title, content, author, status, tags, category, views, isFeatured, imageUrl, updatedAt: new Date() };
+    const updateFields = {
+      title,
+      content,
+      author,
+      status,
+      tags,
+      category,
+      views,
+      isFeatured,
+      imageUrl,
+      updatedAt: new Date(),
+    };
 
-    Object.keys(updateFields).forEach(key => updateFields[key] === undefined && delete updateFields[key]);
+    Object.keys(updateFields).forEach((key) => updateFields[key] === undefined && delete updateFields[key]);
 
     const updatedPost = await NewsPost.findByIdAndUpdate(id, updateFields, { new: true });
 
