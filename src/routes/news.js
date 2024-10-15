@@ -8,6 +8,6 @@ router.get('/:id', newsController.getPostById);
 router.post('/', newsController.createPost);
 router.put('/:id', newsController.updatePost);
 router.delete('/:id', newsController.deletePost);
-router.get('/category/:categoryId', newsController.getPostsByCategory);
+router.get('/category/:categorySlug', newsController.getPostsByCategory);
 
 module.exports = router;

@@ -12,5 +12,6 @@ function route(app) {
   app.use('/categorynews', categorynewsRouter);
   app.use('/registrations', registrationRoutes);
   app.use('/bookings', bookingRoutes);
+  app.use('/', authRoutes);
 }
 module.exports = route;

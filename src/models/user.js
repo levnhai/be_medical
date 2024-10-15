@@ -4,6 +4,7 @@ const User = new Schema(
   {
     // _id: Schema.Types.ObjectId,
     fullName: { type: 'string', required: true },
+    email: { type: String },
     phoneNumber: { type: 'string', required: true },
     password: { type: 'string', required: true, unique: true },
     reEnterPassword: { type: 'string', required: true },
