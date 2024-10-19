@@ -111,7 +111,7 @@ exports.deletePost = async (req, res) => {
 
 exports.getPostsByCategory = async (req, res) => {
   try {
-    const categorySlug = req.params.categorySlug; // Nhận slug từ tham số URL
+    const categorySlug = req.params.categorySlug;
 
     if (!categorySlug) {
       return res.status(400).json({ message: 'Category slug is required' });
@@ -123,8 +123,10 @@ exports.getPostsByCategory = async (req, res) => {
       return res.status(404).json({ message: 'Category not found' });
     }
 
-    // Tìm kiếm các bài viết theo ID của category
-    const posts = await NewsPost.find({ category: category._id });
+    // Tìm kiếm các bài viết và populate thông tin category
+    const posts = await NewsPost.find({ category: category._id })
+      .populate('category', 'name slug'); // Thêm populate để lấy thông tin category
+
     if (posts.length === 0) {
       return res.status(404).json({ message: 'No posts found for this category' });
     }
