@@ -76,6 +76,39 @@ class userController {
       result,
     });
   }
+
+  // handleGetAllUsers
+  async handleGetAllUsers(req, res) {
+    const result = await userServices.handleGetAllUsers();
+    return res.status(result.code).json({
+      result,
+    });
+  }
+
+  // handle delete user
+  async handleDeleteUser(req, res) {
+    const userId = req.body.id;
+    console.log('check user', userId);
+    if (!userId)
+      return res.status(401).json({
+        code: 401,
+        message: 'Không tìm thấy người dùng',
+        status: false,
+      });
+    const result = await userServices.handleDeleteUser(userId);
+    return res.status(result.code).json({
+      result,
+    });
+  }
+
+  // handle edit user
+  async handleEditUser(req, res) {
+    const { formData } = req.body;
+    const result = await userServices.handleEditUser(formData);
+    return res.status(result.code).json({
+      result,
+    });
+  }
 }
 
 module.exports = new userController();

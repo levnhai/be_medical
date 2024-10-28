@@ -21,7 +21,7 @@ app.use(
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb' }));
 
-// // template engine
+// template engine
 app.set('view engine', 'hbs');
 app.engine(
   'hbs',
@@ -38,7 +38,7 @@ app.engine(
 // Sử dụng middleware CORS
 app.use(
   cors({
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000', 'http://localhost:3001'],
     credentials: true,
   }),
 );
