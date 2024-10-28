@@ -103,12 +103,40 @@ class userController {
 
   // handle edit user
   async handleEditUser(req, res) {
-    const { formData } = req.body;
-    const result = await userServices.handleEditUser(formData);
+    const userId = req.params.userId;
+    const formData = req.body;
+
+    if (!userId) {
+      return res.status(401).json({
+        code: 401,
+        message: 'Không tìm thấy người dùng',
+        status: false,
+      });
+    }
+
+    const result = await userServices.handleEditUser(userId, formData);
+    return res.status(result.code).json({
+      result,
+    });
+  }
+  // handle create user
+  async handleCreateUser(req, res) {
+    const formData = req.body;
+    
+    if (!formData.password || !formData.phoneNumber || !formData.fullName) {
+      return res.status(400).json({
+        code: 400,
+        message: 'Vui lòng điền đầy đủ thông tin',
+        status: false,
+      });
+    }
+
+    const result = await userServices.handleCreateUser(formData);
     return res.status(result.code).json({
       result,
     });
   }
 }
+
 
 module.exports = new userController();
