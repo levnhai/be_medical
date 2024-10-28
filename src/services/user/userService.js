@@ -128,6 +128,7 @@ const handleSingIn = ({ phoneNumber, password }) => {
   });
 };
 
+// handle forgot password
 const handleForgotPassword = ({ phoneNumber, password, reEnterPassword }) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -155,6 +156,50 @@ const handleForgotPassword = ({ phoneNumber, password, reEnterPassword }) => {
   });
 };
 
+// handle get all users
+const handleGetAllUsers = () => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const user = await _User.find({}, '-password -reEnterPassword');
+      resolve({ code: 200, message: 'Lấy dữ liệu thành công', status: true, user });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+// handle delete user
+const handleDeleteUser = (userId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let user = await _User.findOneAndDelete({ _id: userId });
+      if (user) {
+        resolve({ code: 200, message: 'Xóa người dùng thành công', status: true });
+      } else {
+        resolve({ code: 200, message: 'Không tìm thấy người dùng', status: false });
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+// handle edit user
+const handleEditUser = (formData) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let user = await _User.findOneAndDelete({ _id: userId });
+      if (user) {
+        resolve({ code: 200, message: 'Xóa người dùng thành công', status: true });
+      } else {
+        resolve({ code: 200, message: 'Không tìm thấy người dùng', status: false });
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 module.exports = {
   handleCheckPhoneExists,
   handleSendotpInput,
@@ -162,4 +207,7 @@ module.exports = {
   handleSingUp,
   handleSingIn,
   handleForgotPassword,
+  handleGetAllUsers,
+  handleDeleteUser,
+  handleEditUser,
 };
