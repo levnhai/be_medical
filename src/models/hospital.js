@@ -1,32 +1,34 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const AddressSchema = require('./address');
 
 const SpecialtyTimeSchema = new Schema({
-  date: {type: 'string', required: true},
-  time: {type: 'string', required: true}
+  date: { type: 'string', required: true },
+  time: { type: 'string', required: true },
 });
 
 const SpecialtySchema = new Schema({
-  name : {type: 'string', required: true},
-  schedule : [SpecialtyTimeSchema]
-})
+  name: { type: 'string', required: true },
+  schedule: [SpecialtyTimeSchema],
+});
 
 const ServiceSchema = new Schema({
-  type: {type: 'string', required: true},
-  description : {type: 'string', required: true},
-  specialties: [SpecialtySchema]
-})
+  type: { type: 'string', required: true },
+  description: { type: 'string', required: true },
+  specialties: [SpecialtySchema],
+});
 
 const Hospital = new Schema({
   fullName: { type: 'string', required: true },
-  address: { type: 'string', required: true },
   phoneNumber: { type: 'string' },
+  email: { type: 'string' },
   workingTime: { type: 'string' },
-  provinceId: { type: 'Number' },
   contentHTML: { type: 'string' },
   contentMarkdown: { type: 'string' },
   hospitalType: { type: 'string' },
-  services: [ServiceSchema],
+  description: { type: 'string' },
+  address: [AddressSchema],
+  // services: [ServiceSchema],
   image: { type: Buffer, contentType: String },
   rating: { type: 'Number', default: 0 },
 });
