@@ -30,7 +30,21 @@ const handleGetHospitalByType = ({ type, search }) => {
     }
   });
 };
-
+//delete 
+const handleDeleteHospital =  (hospitalId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let hospital = await _Hospital.findOneAndDelete({ _id: hospitalId });
+      if (hospital) {
+        resolve({ code: 200, message: 'Xóa bệnh viện thành công', status: true });
+      } else {
+        resolve({ code: 200, message: 'Không tìm thấy bệnh viện', status: false });
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
 // handle get hospital by type
 const handleGetCountHospitalByType = (search) => {
   return new Promise(async (resolve, reject) => {
@@ -102,10 +116,80 @@ const handleCreateHospital = (formData) => {
     }
   });
 };
+// handle edit hospital
+const handleEditHospital = (hospitalId, formData) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const {
+        fullName,
+        phoneNumber,
+        workingTime,
+        hospitalType,
+        email,
+        image,
+        districtId,
+        districtName,
+        provinceId,
+        provinceName,
+        street,
+        wardId,
+        wardName,
+        description,
+      } = formData;
+
+      // Construct address object
+      const address = [{  // Notice the array wrapper to match schema
+        districtId,
+        districtName,
+        provinceId,
+        provinceName,
+        street,
+        wardId,
+        wardName
+      }];
+
+      // Find and update the hospital
+      const updatedHospital = await _Hospital.findByIdAndUpdate(
+        hospitalId,  // Remove the object wrapper
+        {
+          fullName,
+          phoneNumber,
+          workingTime,
+          hospitalType,
+          email,
+          image,
+          address,  // Use the address array
+          description,
+        },
+        { new: true, runValidators: true }
+      );
+
+      if (!updatedHospital) {
+        return resolve({
+          code: 404,
+          message: 'Không tìm thấy bệnh viện',
+          status: false
+        });
+      }
+
+      resolve({
+        code: 200,
+        message: 'Cập nhật bệnh viện thành công',
+        status: true,
+        hospital: updatedHospital
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+  
+};
 
 module.exports = {
   handleGetAllHospital,
   handleGetHospitalByType,
   handleCreateHospital,
   handleGetCountHospitalByType,
+  handleEditHospital,
+  handleDeleteHospital
 };

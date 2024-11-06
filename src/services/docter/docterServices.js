@@ -98,7 +98,119 @@ const handleCheckPhoneExists = (phoneNumberInput) => {
   });
 };
 
+const handleUpdateDocter = (docterId, updateData) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const {
+        fullName,
+        phoneNumber,
+        email,
+        rating,
+        positionId,
+        gender,
+        price,
+        provinceId,
+        districtId,
+        wardId,
+        provinceName,
+        districtName,
+        wardName,
+        street,
+        image,
+        hospitalId,
+      } = updateData;
+
+      // Kiểm tra bác sĩ có tồn tại không
+      const existingDocter = await _Docter.findById(docterId);
+      if (!existingDocter) {
+        resolve({
+          code: 404,
+          message: 'Không tìm thấy bác sĩ',
+          status: false
+        });
+        return;
+      }
+
+      // Kiểm tra số điện thoại mới có trùng với bác sĩ khác không
+      if (phoneNumber !== existingDocter.phoneNumber) {
+        const isPhoneExists = await handleCheckPhoneExists(phoneNumber);
+        if (isPhoneExists) {
+          resolve({
+            code: 400,
+            message: 'Số điện thoại đã tồn tại',
+            status: false
+          });
+          return;
+        }
+      }
+
+      const address = {
+        provinceId,
+        districtId,
+        wardId,
+        provinceName,
+        districtName,
+        wardName,
+        street,
+      };
+
+      const updatedDocter = await _Docter.findByIdAndUpdate(
+        docterId,
+        {
+          fullName,
+          phoneNumber,
+          email,
+          rating,
+          positionId,
+          gender,
+          address,
+          image,
+          hospitalId,
+        },
+        { new: true }
+      ).select('-password -reEnterPassword');
+
+      resolve({
+        code: 200,
+        message: 'Cập nhật thông tin bác sĩ thành công',
+        status: true,
+        data: updatedDocter
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+const handleDeleteDocter = (docterId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const existingDocter = await _Docter.findById(docterId);
+      if (!existingDocter) {
+        resolve({
+          code: 404,
+          message: 'Không tìm thấy bác sĩ',
+          status: false
+        });
+        return;
+      }
+
+      await _Docter.findByIdAndDelete(docterId);
+
+      resolve({
+        code: 200,
+        message: 'Xóa bác sĩ thành công',
+        status: true
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 module.exports = {
   handleGetAllDocter,
   handleCreateDocter,
-};
+  handleUpdateDocter,
+  handleDeleteDocter,
+};;

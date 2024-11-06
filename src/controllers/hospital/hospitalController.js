@@ -39,5 +39,25 @@ class HospitalController {
       result,
     });
   }
+
+  // handle edit hospital
+  async handleEditHospital(req, res, next) {
+    const hospitalId = req.params.hospitalId;
+    const formData = req.body;
+    let result = await HospitalServices.handleEditHospital(hospitalId, formData);
+    return res.status(result.code).json({
+      result,
+    });
+  }
+
+  // handle delete hospital
+  async handleDeleteHospital(req, res, next){
+    const hospitalId = req.params.hospitalId;
+    const formData = req.body;
+    let result = await HospitalServices.handleDeleteHospital(hospitalId, formData);
+    return res.status(result.code).json({
+      result,
+    });
+  }
 }
 module.exports = new HospitalController();

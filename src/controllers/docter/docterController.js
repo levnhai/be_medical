@@ -19,9 +19,32 @@ class DocterController {
       });
     }
   }
-
   index(req, res, next) {
     res.send('đây là docter');
+  }
+  async handleUpdateDocter(req, res, next) {
+    try {
+      const docterId = req.params.id;
+      const updateData = req.body;
+      const result = await DocterServices.handleUpdateDocter(docterId, updateData);
+      return res.status(result.code).json({
+        result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async handleDeleteDocter(req, res, next) {
+    try {
+      const docterId = req.params.id;
+      const result = await DocterServices.handleDeleteDocter(docterId);
+      return res.status(result.code).json({
+        result,
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 }
 module.exports = new DocterController();
