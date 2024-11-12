@@ -7,6 +7,7 @@ const docterRoutes = require('./docter');
 const authRoutes = require('./auth');
 const userRoutes = require('./user');
 const hospitalRoutes = require('./hospital');
+const contactCollabRoutes = require('./contactCollab');
 
 function route(app) {
   app.use('/', homeRouter);
@@ -18,6 +19,7 @@ function route(app) {
   app.use('/docter', docterRoutes);
   app.use('/user', userRoutes);
   app.use('/hospital', hospitalRoutes);
+  app.use('/contact', contactCollabRoutes);
   app.use('/', authRoutes);
 }
 module.exports = route;
