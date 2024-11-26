@@ -1,4 +1,9 @@
+const bcrypt = require('bcryptjs');
+const salt = bcrypt.genSaltSync(10);
+
 const _Hospital = require('../../models/hospital');
+const { isCheckPhoneExists } = require('../../utils/checkPhoneExists');
+const _Account = require('../../models/account');
 
 // handle get all hospital
 const handleGetAllHospital = () => {
@@ -30,8 +35,8 @@ const handleGetHospitalByType = ({ type, search }) => {
     }
   });
 };
-//delete 
-const handleDeleteHospital =  (hospitalId) => {
+//delete
+const handleDeleteHospital = (hospitalId) => {
   return new Promise(async (resolve, reject) => {
     try {
       let hospital = await _Hospital.findOneAndDelete({ _id: hospitalId });
@@ -84,6 +89,8 @@ const handleCreateHospital = (formData) => {
       const {
         fullName,
         phoneNumber,
+        password,
+        reEnterPassword,
         workingTime,
         hospitalType,
         email,
@@ -98,13 +105,32 @@ const handleCreateHospital = (formData) => {
         description,
       } = formData;
       const address = { districtId, districtName, provinceId, provinceName, street, wardId, wardName };
-      console.log('check fullName', fullName);
-      const hospital = await _Hospital.create({
-        fullName,
+
+      const isCheckphoneExists = await isCheckPhoneExists(phoneNumber);
+      if (isCheckphoneExists) {
+        resolve({ code: 400, message: 'Số điện thoại đã tồn tại', status: false });
+        return;
+      }
+
+      if (password !== reEnterPassword) {
+        resolve({ code: 400, message: 'Nhập mật khẩu không trùng khớp', status: false });
+        return;
+      }
+
+      let hastpassword = await bcrypt.hashSync(password, salt);
+
+      const account = await _Account.create({
         phoneNumber,
+        email,
+        password: hastpassword,
+        role: 'hospital_admin',
+      });
+
+      const hospital = await _Hospital.create({
+        accountId: account._id,
+        fullName,
         workingTime,
         hospitalType,
-        email,
         image,
         address,
         description,
@@ -138,19 +164,22 @@ const handleEditHospital = (hospitalId, formData) => {
       } = formData;
 
       // Construct address object
-      const address = [{  // Notice the array wrapper to match schema
-        districtId,
-        districtName,
-        provinceId,
-        provinceName,
-        street,
-        wardId,
-        wardName
-      }];
+      const address = [
+        {
+          // Notice the array wrapper to match schema
+          districtId,
+          districtName,
+          provinceId,
+          provinceName,
+          street,
+          wardId,
+          wardName,
+        },
+      ];
 
       // Find and update the hospital
       const updatedHospital = await _Hospital.findByIdAndUpdate(
-        hospitalId,  // Remove the object wrapper
+        hospitalId, // Remove the object wrapper
         {
           fullName,
           phoneNumber,
@@ -158,17 +187,17 @@ const handleEditHospital = (hospitalId, formData) => {
           hospitalType,
           email,
           image,
-          address,  // Use the address array
+          address, // Use the address array
           description,
         },
-        { new: true, runValidators: true }
+        { new: true, runValidators: true },
       );
 
       if (!updatedHospital) {
         return resolve({
           code: 404,
           message: 'Không tìm thấy bệnh viện',
-          status: false
+          status: false,
         });
       }
 
@@ -176,13 +205,12 @@ const handleEditHospital = (hospitalId, formData) => {
         code: 200,
         message: 'Cập nhật bệnh viện thành công',
         status: true,
-        hospital: updatedHospital
+        hospital: updatedHospital,
       });
     } catch (error) {
       reject(error);
     }
   });
-  
 };
 
 module.exports = {
@@ -191,5 +219,5 @@ module.exports = {
   handleCreateHospital,
   handleGetCountHospitalByType,
   handleEditHospital,
-  handleDeleteHospital
+  handleDeleteHospital,
 };

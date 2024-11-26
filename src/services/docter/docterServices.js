@@ -1,6 +1,9 @@
-const _Docter = require('../../models/docter');
 const bcrypt = require('bcryptjs');
 const salt = bcrypt.genSaltSync(10);
+
+const _Docter = require('../../models/docter');
+const _Account = require('../../models/account');
+const { isCheckPhoneExists } = require('../../utils/checkPhoneExists');
 
 const handleCreateDocter = (formData) => {
   return new Promise(async (resolve, reject) => {
@@ -34,25 +37,32 @@ const handleCreateDocter = (formData) => {
         wardName,
         street,
       };
-      const isCheckphoneExists = await handleCheckPhoneExists(phoneNumber);
-      if (isCheckphoneExists) {
-        resolve({ code: 400, message: 'Số điện thoại đã tồn tại', status: false });
-        return;
+
+      const session = await mongoose.startSession();
+      session.startTransaction();
+
+      const isCheckPhoneExist = await isCheckPhoneExists(phoneNumber);
+      if (isCheckPhoneExist) {
+        resolve({ code: 200, message: 'Số điện thoại đã tồn tại', status: false });
       }
 
       if (password !== reEnterPassword) {
-        resolve({ code: 400, message: 'Nhập mật khẩu không trùng khớp', status: false });
-        return;
+        resolve({ code: 200, message: 'Nhập mật khẩu không trùng khớp', status: false });
       }
 
       let hastpassword = await bcrypt.hashSync(password, salt);
-      let hastReEnterPassword = await bcrypt.hashSync(reEnterPassword, salt);
-      const docter = await _Docter.create({
+
+      const account = await _Account.create({
         phoneNumber,
-        fullName,
         email,
         password: hastpassword,
-        reEnterPassword: hastReEnterPassword,
+        role: 'docter',
+      });
+
+      const docter = await _Docter.create({
+        accountId: account._id,
+        fullName,
+        price,
         rating,
         positionId,
         gender,
@@ -74,24 +84,6 @@ const handleGetAllDocter = () => {
     try {
       const data = await _Docter.find({}, '-password -reEnterPassword');
       resolve({ code: 200, message: 'Lấy dữ liệu thành công', status: true, total: data.length, data });
-    } catch (error) {
-      reject(error);
-    }
-  });
-};
-
-const handleCheckPhoneExists = (phoneNumberInput) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      let isCheckPhoneExists = await _Docter.findOne({
-        phoneNumber: phoneNumberInput,
-      });
-
-      if (isCheckPhoneExists) {
-        resolve(true);
-      } else {
-        resolve(false);
-      }
     } catch (error) {
       reject(error);
     }
@@ -126,19 +118,19 @@ const handleUpdateDocter = (docterId, updateData) => {
         resolve({
           code: 404,
           message: 'Không tìm thấy bác sĩ',
-          status: false
+          status: false,
         });
         return;
       }
 
       // Kiểm tra số điện thoại mới có trùng với bác sĩ khác không
       if (phoneNumber !== existingDocter.phoneNumber) {
-        const isPhoneExists = await handleCheckPhoneExists(phoneNumber);
+        const isPhoneExists = await isCheckPhoneExists(phoneNumber);
         if (isPhoneExists) {
           resolve({
             code: 400,
             message: 'Số điện thoại đã tồn tại',
-            status: false
+            status: false,
           });
           return;
         }
@@ -154,27 +146,29 @@ const handleUpdateDocter = (docterId, updateData) => {
         street,
       };
 
-      const updatedDocter = await _Docter.findByIdAndUpdate(
-        docterId,
-        {
-          fullName,
-          phoneNumber,
-          email,
-          rating,
-          positionId,
-          gender,
-          address,
-          image,
-          hospitalId,
-        },
-        { new: true }
-      ).select('-password -reEnterPassword');
+      const updatedDocter = await _Docter
+        .findByIdAndUpdate(
+          docterId,
+          {
+            fullName,
+            phoneNumber,
+            email,
+            rating,
+            positionId,
+            gender,
+            address,
+            image,
+            hospitalId,
+          },
+          { new: true },
+        )
+        .select('-password -reEnterPassword');
 
       resolve({
         code: 200,
         message: 'Cập nhật thông tin bác sĩ thành công',
         status: true,
-        data: updatedDocter
+        data: updatedDocter,
       });
     } catch (error) {
       reject(error);
@@ -190,7 +184,7 @@ const handleDeleteDocter = (docterId) => {
         resolve({
           code: 404,
           message: 'Không tìm thấy bác sĩ',
-          status: false
+          status: false,
         });
         return;
       }
@@ -200,7 +194,25 @@ const handleDeleteDocter = (docterId) => {
       resolve({
         code: 200,
         message: 'Xóa bác sĩ thành công',
-        status: true
+        status: true,
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+const handleGetDocterByHospital = (hospitalId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      console.log('check hospitalid', hospitalId);
+      const data = await _Docter.find({ hospitalId });
+      resolve({
+        code: 200,
+        message: 'Lấy dữ liệu thành công',
+        status: true,
+        total: data.length,
+        data,
       });
     } catch (error) {
       reject(error);
@@ -213,4 +225,5 @@ module.exports = {
   handleCreateDocter,
   handleUpdateDocter,
   handleDeleteDocter,
-};;
+  handleGetDocterByHospital,
+};

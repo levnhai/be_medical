@@ -4,7 +4,6 @@ class HospitalController {
   // get all hospital
   async getAllHospital(req, res, next) {
     let result = await HospitalServices.handleGetAllHospital();
-    console.log('check hospital status', result);
     return res.status(result.code).json({
       result,
     });
@@ -51,7 +50,7 @@ class HospitalController {
   }
 
   // handle delete hospital
-  async handleDeleteHospital(req, res, next){
+  async handleDeleteHospital(req, res, next) {
     const hospitalId = req.params.hospitalId;
     const formData = req.body;
     let result = await HospitalServices.handleDeleteHospital(hospitalId, formData);

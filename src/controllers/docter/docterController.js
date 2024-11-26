@@ -19,9 +19,7 @@ class DocterController {
       });
     }
   }
-  index(req, res, next) {
-    res.send('đây là docter');
-  }
+
   async handleUpdateDocter(req, res, next) {
     try {
       const docterId = req.params.id;
@@ -39,6 +37,18 @@ class DocterController {
     try {
       const docterId = req.params.id;
       const result = await DocterServices.handleDeleteDocter(docterId);
+      return res.status(result.code).json({
+        result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async handleGetDocterByHospital(req, res, next) {
+    try {
+      const { hospitalId } = req.body;
+      const result = await DocterServices.handleGetDocterByHospital(hospitalId);
       return res.status(result.code).json({
         result,
       });

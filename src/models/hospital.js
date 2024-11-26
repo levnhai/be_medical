@@ -19,9 +19,8 @@ const ServiceSchema = new Schema({
 });
 
 const Hospital = new Schema({
+  accountId: Schema.Types.ObjectId,
   fullName: { type: 'string', required: true },
-  phoneNumber: { type: 'string' },
-  email: { type: 'string' },
   workingTime: { type: 'string' },
   contentHTML: { type: 'string' },
   contentMarkdown: { type: 'string' },

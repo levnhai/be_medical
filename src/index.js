@@ -5,6 +5,7 @@ const hbs = require('express-handlebars');
 const route = require('./routes');
 const db = require('./config/database');
 const methodOverride = require('method-override');
+const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
 const app = express();
@@ -50,6 +51,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // method override
 app.use(methodOverride('_method'));
+
+// cookie
+app.use(cookieParser());
 
 // router init
 app.listen(port, () => {

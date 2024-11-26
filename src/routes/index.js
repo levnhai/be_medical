@@ -11,7 +11,6 @@ const contactCollabRoutes = require('./contactCollab');
 
 function route(app) {
   app.use('/', homeRouter);
-  app.use('/auth', authRoutes);
   app.use('/news', newsRouter);
   app.use('/categorynews', categorynewsRouter);
   app.use('/registrations', registrationRoutes);
@@ -20,6 +19,6 @@ function route(app) {
   app.use('/user', userRoutes);
   app.use('/hospital', hospitalRoutes);
   app.use('/contact', contactCollabRoutes);
-  app.use('/', authRoutes);
+  app.use('/auth', authRoutes);
 }
 module.exports = route;
