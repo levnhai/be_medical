@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const salt = bcrypt.genSaltSync(10);
-
+const mongoose = require('mongoose');
 const _Docter = require('../../models/docter');
 const _Account = require('../../models/account');
 const { isCheckPhoneExists } = require('../../utils/checkPhoneExists');

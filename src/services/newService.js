@@ -4,11 +4,41 @@ const _New = require('../models/NewsPost');
 const CategoryNews = require('../models/CategoryNews');
 const NewsPost = require('../models/NewsPost');
 
-const handleGetAllPosts = () => {
+const handleGetAllPostsAdmin = () => {
   return new Promise(async (resolve, reject) => {
     try {
       // Lấy tất cả các bài viết
       const news = await _New.find({})
+        .populate('category', 'name slug')
+        .sort({ createdAt: -1 });
+
+      // Giới hạn ký tự cho tiêu đề và nội dung của mỗi bài viết
+      const modifiedNews = news.map(article => ({
+        ...article._doc, // Dùng _doc để lấy dữ liệu gốc từ Mongoose document
+        title: article.title.length > 50 
+          ? article.title.slice(0, 50) + '...' 
+          : article.title,
+        content: article.content.length > 100 
+          ? article.content.slice(0, 100) + '...' 
+          : article.content
+      }));
+
+      resolve({ 
+        message: 'Lấy dữ liệu thành công', 
+        code: 200, 
+        status: true, 
+        news: modifiedNews 
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+const handleGetAllPosts = () => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Lấy tất cả các bài viết có status khác 0
+      const news = await _New.find({ status: 1  })
         .populate('category', 'name slug')
         .sort({ createdAt: -1 });
 
@@ -55,28 +85,32 @@ const handleGetPostById = (postId) => {
   };
 
   // Create new post
-const handleCreatePost = (postData) => {
-  return new Promise(async (resolve, reject) => {
+  const handleCreatePost = async (postData) => {
     try {
       // Validate category exists
       const category = await CategoryNews.findById(postData.category);
       if (!category) {
-        return resolve({ message: 'Danh mục không tồn tại', code: 404, status: false });
+        return { 
+          message: 'Danh mục không tồn tại', 
+          code: 404, 
+          status: false 
+        };
       }
-
-      const news = new _New(postData);
-      await news.save();
-      resolve({ 
-        message: 'Tạo bài viết thành công', 
-        code: 201, 
-        status: true, 
-        news 
-      });
+  
+      // Create new post
+      const newsPost = new NewsPost(postData);
+      await newsPost.save();
+  
+      return {
+        message: 'Tạo bài viết thành công',
+        code: 201,
+        status: true,
+        newsPost
+      };
     } catch (error) {
-      reject(error);
+      throw error;
     }
-  });
-};
+  };
 // Update post
 const handleUpdatePost = (postId, updateData) => {
   return new Promise(async (resolve, reject) => {
@@ -179,5 +213,6 @@ module.exports = {
     handleCreatePost,
     handleUpdatePost,
     handleDeletePost,
-    handleGetPostsByCategory
+    handleGetPostsByCategory,
+    handleGetAllPostsAdmin,
 };

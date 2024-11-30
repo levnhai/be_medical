@@ -1,20 +1,44 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
-const CategoryNews = require('./CategoryNews');
 
 const newsPostSchema = new mongoose.Schema({
   title: { type: String, required: true },
   content: { type: String, required: true },
-  author: { type: String, required: true },
+  author: {
+    type: {
+      _id: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        refPath: 'authorModel'
+      },
+      fullName: {
+        type: String,
+        required: true
+      }
+    },
+    required: true
+  },
+  authorModel: {
+    type: String,
+    required: true,
+    enum: ['Hospital', 'Docter']
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   slug: { type: String, required: true, unique: true },
-  status: { type: String, enum: ['draft', 'published', 'deleted'], default: 'draft' },
+  status: {
+    type: Number,
+    enum: [1, 2, 3],
+    default: 2,
+  },
   tags: [{ type: String }],
-  category: { type: mongoose.Schema.Types.ObjectId, ref: 'CategoryNews', required: true },
+  category: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'CategoryNews', 
+    required: true 
+  },
   views: { type: Number, default: 0 },
-  isFeatured: { type: Boolean, default: false },
-  imageUrl: { type: String, required: true } // Bắt buộc phải có giá trị
+  imageUrl: { type: String, required: true }
 });
 
 // Tạo slug tự động từ title

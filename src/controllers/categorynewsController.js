@@ -27,14 +27,19 @@ exports.getCategoryById = async (req, res) => {
 // Tạo mới thể loại
 exports.createCategory = async (req, res) => {
   try {
-    const { name, description } = req.body;
+    console.log('Request body:', req.body);
+
+    // Access the nested formData object
+    const { name, description, status } = req.body.formData;
 
     if (!name) {
       return res.status(400).json({ message: 'Name is required' });
     }
 
-    const newCategory = new CategoryNews({ name, description });
+    // Create a new category with the received data
+    const newCategory = new CategoryNews({ name, description, status });
     await newCategory.save();
+
     res.status(201).json(newCategory);
   } catch (err) {
     res.status(400).json({ message: err.message });

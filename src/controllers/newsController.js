@@ -11,7 +11,21 @@ class newController {
         result
       });
   }
-
+  // get all post admin
+  async getAllPostsAdmin(req, res) {
+    try {
+      const result = await newService.handleGetAllPostsAdmin();
+      return res.status(result.code).json({
+        result
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Lỗi hệ thống',
+        error: error.message
+      });
+    }
+  }
+  
    // get post by id
    async getPostById(req, res) {
     const postId = req.params.id;
@@ -25,27 +39,48 @@ class newController {
       });
     }
   }
-  // Create new post
   async createPost(req, res) {
     try {
+      console.log('Full Request User:', req.user);
+      console.log('Request Body:', req.body);
+ 
       const postData = req.body;
+ 
+      // Validate required fields
       if (!postData.title || !postData.content || !postData.category || !postData.imageUrl) {
         return res.status(400).json({
           message: 'Thiếu thông tin bắt buộc',
           status: false
         });
       }
-
+ 
+      // Extra safety checks
+      if (!req.user || !req.user._id || !req.user.fullName) {
+        return res.status(401).json({
+          message: 'Thông tin người dùng không hợp lệ',
+          status: false
+        });
+      }
+ 
+      // Sử dụng thông tin người dùng từ middleware
+      postData.author = {
+        _id: req.user._id,
+        fullName: req.user.fullName
+      };
+      postData.authorModel = req.user.model;
+ 
       const result = await newService.handleCreatePost(postData);
       return res.status(result.code).json({ result });
     } catch (error) {
-      return res.status(500).json({ 
-        message: 'Lỗi server', 
-        status: false, 
-        error: error.message 
+      console.error('FULL CREATE POST ERROR:', error);
+      return res.status(500).json({
+        message: 'Lỗi server',
+        status: false,
+        error: error.message,
+        errorStack: error.stack
       });
     }
-  }
+ }
   // Update post
   async updatePost(req, res) {
     try {
