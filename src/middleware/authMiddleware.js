@@ -100,21 +100,28 @@ exports.protect = async (req, res, next) => {
     let userDetails;
     let modelName;
 
-    switch(currentUser.role) {
+    switch (currentUser.role) {
       case 'docter':
         userDetails = await _Docter.findOne({ accountId: currentUser._id });
         modelName = 'Docter';
         break;
+    
       case 'hospital_admin':
         userDetails = await _Hospital.findOne({ accountId: currentUser._id });
         modelName = 'Hospital';
         break;
+    
+      case 'system_admin':
+        userDetails = { accountId: currentUser._id };
+        modelName = 'SystemAdmin';
+        break;
+    
       default:
         return res.status(403).json({
           status: 'fail',
           message: 'User role not recognized',
         });
-    }
+    }    
 
     // Ensure userDetails exists
     if (!userDetails) {
@@ -143,6 +150,7 @@ exports.protect = async (req, res, next) => {
 };
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
+    console.log('User role:', req.user.role); // In ra role để kiểm tra
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         status: 'fail',
@@ -152,6 +160,7 @@ exports.restrictTo = (...roles) => {
     next();
   };
 };
+
 
 exports.adminOnly = (req, res, next) => {
   console.log('check req.user.role', req.user.role);

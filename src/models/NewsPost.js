@@ -3,6 +3,7 @@ const slugify = require('slugify');
 
 const newsPostSchema = new mongoose.Schema({
   title: { type: String, required: true },
+  subtitle: {type: String, required: false},
   content: { type: String, required: true },
   author: {
     type: {
@@ -18,25 +19,13 @@ const newsPostSchema = new mongoose.Schema({
     },
     required: true
   },
-  authorModel: {
-    type: String,
-    required: true,
-    enum: ['Hospital', 'Docter']
-  },
+  authorModel: {type: String, required: true, enum: ['Hospital', 'Docter']},
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   slug: { type: String, required: true, unique: true },
-  status: {
-    type: Number,
-    enum: [1, 2, 3],
-    default: 2,
-  },
+  status: {type: Number, enum: [1, 2, 3], default: 2 },
   tags: [{ type: String }],
-  category: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'CategoryNews', 
-    required: true 
-  },
+  category: { type: mongoose.Schema.Types.ObjectId, ref: 'CategoryNews', required: true },
   views: { type: Number, default: 0 },
   imageUrl: { type: String, required: true }
 });

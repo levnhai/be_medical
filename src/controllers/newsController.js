@@ -147,6 +147,38 @@ class newController {
         });
     }
   }
+  async getRelatedNews(req, res) {
+    try {
+      const postId = req.params.postId;
+      if (!postId) {
+        return res.status(400).json({
+          message: 'ID bài viết không được để trống',
+          status: false
+        });
+      }
+  
+      const result = await newService.handleGetRelatedNews(postId);
+      return res.status(result.code).json({ result });
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Lỗi server',
+        status: false,
+        error: error.message
+      });
+    }
+  }
+  async getMostViewedNews(req, res) {
+    try {
+      const result = await newService.handleGetMostViewedNews();
+      return res.status(result.code).json({ result });
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Lỗi server',
+        status: false,
+        error: error.message
+      });
+    }
+  }
 }
 
 module.exports = new newController();

@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const _New = require('../models/NewsPost');
 const CategoryNews = require('../models/CategoryNews');
 const NewsPost = require('../models/NewsPost');
+const mongoose = require('mongoose');
 
 const handleGetAllPostsAdmin = () => {
   return new Promise(async (resolve, reject) => {
@@ -12,22 +13,22 @@ const handleGetAllPostsAdmin = () => {
         .populate('category', 'name slug')
         .sort({ createdAt: -1 });
 
-      // Giới hạn ký tự cho tiêu đề và nội dung của mỗi bài viết
-      const modifiedNews = news.map(article => ({
-        ...article._doc, // Dùng _doc để lấy dữ liệu gốc từ Mongoose document
-        title: article.title.length > 50 
-          ? article.title.slice(0, 50) + '...' 
-          : article.title,
-        content: article.content.length > 100 
-          ? article.content.slice(0, 100) + '...' 
-          : article.content
-      }));
+      // // Giới hạn ký tự cho tiêu đề và nội dung của mỗi bài viết
+      // const modifiedNews = news.map(article => ({
+      //   ...article._doc, // Dùng _doc để lấy dữ liệu gốc từ Mongoose document
+      //   title: article.title.length > 50 
+      //     ? article.title.slice(0, 50) + '...' 
+      //     : article.title,
+      //   content: article.content.length > 100 
+      //     ? article.content.slice(0, 100) + '...' 
+      //     : article.content
+      // }));
 
       resolve({ 
         message: 'Lấy dữ liệu thành công', 
         code: 200, 
         status: true, 
-        news: modifiedNews 
+        news: news 
       });
     } catch (error) {
       reject(error);
@@ -37,7 +38,6 @@ const handleGetAllPostsAdmin = () => {
 const handleGetAllPosts = () => {
   return new Promise(async (resolve, reject) => {
     try {
-      // Lấy tất cả các bài viết có status khác 0
       const news = await _New.find({ status: 1  })
         .populate('category', 'name slug')
         .sort({ createdAt: -1 });
@@ -65,25 +65,39 @@ const handleGetAllPosts = () => {
   });
 };
 
-
   // handle get post by id
-const handleGetPostById = (postId) => {
+  const handleGetPostById = (postId) => {
     return new Promise(async (resolve, reject) => {
       try {
-          const news = await _New.findOne({_id: postId});
-          if(!news) {
-              resolve({ message: 'Không tìm thấy bài viết', code: 200, status:true });
-          }
-          else {
-            resolve({ message: 'Lấy dữ liệu thành công', code: 200, status:true, news });
-          }
+        if (!mongoose.Types.ObjectId.isValid(postId)) {
+          return resolve({
+            message: 'ID không hợp lệ',
+            code: 400,
+            status: false,
+          });
         }
-      catch (error) {
+        const news = await _New.findOne({ _id: postId, status: 1 })
+          .populate('category', 'name slug');
+  
+        if (!news) {
+          return resolve({
+            message: 'Không tìm thấy bài viết',
+            code: 404,
+            status: false,
+          });
+        }
+        resolve({
+          message: 'Lấy dữ liệu thành công',
+          code: 200,
+          status: true,
+          news,
+        });
+      } catch (error) {
         reject(error);
       }
     });
   };
-
+  
   // Create new post
   const handleCreatePost = async (postData) => {
     try {
@@ -177,14 +191,13 @@ const handleGetPostsByCategory = (categorySlug) => {
           status: false 
         });
       }
-
-      const news = await _New.find({ category: category._id })
+      const news = await _New.find({ category: category._id, status: 1 }) 
         .sort({ createdAt: -1 })
         .populate('category');
 
       // Giới hạn ký tự cho tiêu đề và nội dung của mỗi bài viết
       const modifiedNews = news.map(article => ({
-        ...article._doc, // Dùng _doc để lấy dữ liệu gốc từ Mongoose document
+        ...article._doc, 
         title: article.title.length > 50 
           ? article.title.slice(0, 50) + '...' 
           : article.title,
@@ -197,13 +210,84 @@ const handleGetPostsByCategory = (categorySlug) => {
         message: 'Lấy dữ liệu thành công',
         code: 200,
         status: true,
-        news: modifiedNews, // Sử dụng modifiedNews đã được giới hạn
+        news: modifiedNews, 
         category
       });
     } catch (error) {
       reject(error);
     }
   });
+};
+// tin tức liên quan
+const handleGetRelatedNews = async (postId) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(postId)) {
+      return {
+        message: 'ID không hợp lệ',
+        code: 400,
+        status: false,
+      };
+    }
+    // Tìm bài viết gốc để lấy category
+    const originalNews = await _New.findOne({ 
+      _id: postId, 
+      status: 1 
+    }).populate('category', 'name slug');
+
+    if (!originalNews) {
+      return {
+        message: 'Không tìm thấy bài viết',
+        code: 404,
+        status: false,
+      };
+    }
+    // Tìm các bài viết liên quan
+    const relatedNews = await _New.find({
+      _id: { $ne: postId },
+      category: originalNews.category._id,
+      status: 1
+    })
+    .populate('category', 'name slug')
+    .limit(10)
+    .sort({ createdAt: -1 });
+
+    return {
+      message: 'Lấy tin liên quan thành công',
+      code: 200,
+      status: true,
+      relatedNews
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+// lấy cao nhất
+const handleGetMostViewedNews = async () => {
+  try {
+    const mostViewedNews = await _New.find({ status: 1 })
+      .sort({ views: -1 })
+      .limit(9)
+      .populate('category', 'name slug');
+
+    const modifiedNews = mostViewedNews.map(article => ({
+      ...article._doc, 
+      title: article.title && article.title.length > 50
+        ? article.title.slice(0, 50) + '...' 
+        : article.title,
+      content: article.content && article.content.length > 100 
+        ? article.content.slice(0, 100) + '...' 
+        : article.content
+    }));
+
+    return {
+      message: 'Lấy bài viết có lượt xem cao nhất thành công',
+      code: 200,
+      status: true,
+      mostViewedNews: modifiedNews
+    };
+  } catch (error) {
+    throw error;
+  }
 };
 
 
@@ -215,4 +299,6 @@ module.exports = {
     handleDeletePost,
     handleGetPostsByCategory,
     handleGetAllPostsAdmin,
+    handleGetRelatedNews,
+    handleGetMostViewedNews,
 };
