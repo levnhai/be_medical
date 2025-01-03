@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const _Account = require('../models/account');
-const _Docter = require('../models/docter');
+const _Doctor = require('../models/doctor');
 const _Hospital = require('../models/hospital');
 
 // exports.protect = async (req, res, next) => {
@@ -88,26 +88,26 @@ exports.protect = async (req, res, next) => {
 
     switch (currentUser.role) {
       case 'docter':
-        userDetails = await _Docter.findOne({ accountId: currentUser._id });
+        userDetails = await _Doctor.findOne({ accountId: currentUser._id });
         modelName = 'Docter';
         break;
-    
+
       case 'hospital_admin':
         userDetails = await _Hospital.findOne({ accountId: currentUser._id });
         modelName = 'Hospital';
         break;
-    
+
       case 'system_admin':
         userDetails = { accountId: currentUser._id };
         modelName = 'SystemAdmin';
         break;
-    
+
       default:
         return res.status(403).json({
           status: 'fail',
           message: 'User role not recognized',
         });
-    }    
+    }
 
     // Ensure userDetails exists
     if (!userDetails) {
@@ -140,7 +140,6 @@ exports.restrictTo = (...roles) => {
     next();
   };
 };
-
 
 exports.adminOnly = (req, res, next) => {
   console.log('check req.user.role', req.user.role);
