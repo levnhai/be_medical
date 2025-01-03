@@ -3,7 +3,7 @@ const salt = bcrypt.genSaltSync(10);
 const mongoose = require('mongoose');
 
 const _Account = require('../../models/account');
-const _Docter = require('../../models/docter');
+const _Docter = require('../../models/doctor');
 const _Hospital = require('../../models/hospital');
 const _User = require('../../models/user');
 const _Otp = require('../../models/otp');
