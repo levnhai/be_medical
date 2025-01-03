@@ -24,11 +24,11 @@ const Hospital = new Schema({
   workingTime: { type: 'string' },
   contentHTML: { type: 'string' },
   contentMarkdown: { type: 'string' },
-  hospitalType: { type: 'string' },
+  hospitalType: { type: 'string', required: true },
   description: { type: 'string' },
   address: [AddressSchema],
   // services: [ServiceSchema],
-  image: { type: Buffer, contentType: String },
+  image: { type: Buffer, contentType: String, required: true },
   rating: { type: 'Number', default: 0 },
 });
 

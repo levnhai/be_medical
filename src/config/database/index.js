@@ -13,4 +13,4 @@ async function Connect() {
   }
 }
 
-module.exports = { Connect };
+module.exports = { Connect, mongoose };

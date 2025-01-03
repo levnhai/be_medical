@@ -86,6 +86,8 @@ const handleGetCountHospitalByType = (search) => {
 const handleCreateHospital = (formData) => {
   return new Promise(async (resolve, reject) => {
     try {
+      const session = await mongoose.startSession(); // Khởi tạo session từ mongoose
+      session.startTransaction(); // Bắt đầu transaction
       const {
         fullName,
         phoneNumber,
@@ -119,25 +121,41 @@ const handleCreateHospital = (formData) => {
 
       let hastpassword = await bcrypt.hashSync(password, salt);
 
-      const account = await _Account.create({
-        phoneNumber,
-        email,
-        password: hastpassword,
-        role: 'hospital_admin',
-      });
+      const account = await _Account.create(
+        [
+          {
+            phoneNumber,
+            email,
+            password: hastpassword,
+            role: 'hospital_admin',
+          },
+        ],
+        {
+          session,
+        },
+      );
 
-      const hospital = await _Hospital.create({
-        accountId: account._id,
-        fullName,
-        workingTime,
-        hospitalType,
-        image,
-        address,
-        description,
-      });
-
+      const hospital = await _Hospital.create(
+        [
+          {
+            accountId: account._id,
+            fullName,
+            workingTime,
+            hospitalType,
+            image,
+            address,
+            description,
+          },
+        ],
+        session,
+      );
+      await session.commitTransaction();
+      session.endSession();
       resolve({ code: 200, message: 'Thêm bệnh viện thành công', status: true, hospital });
     } catch (error) {
+      // Nếu xảy ra lỗi, rollback
+      await session.abortTransaction();
+      session.endSession();
       reject(error);
     }
   });

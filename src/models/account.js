@@ -8,7 +8,7 @@ const AccountSchema = new mongoose.Schema(
     role: {
       type: String,
       required: true,
-      enum: ['system_admin', 'hospital_admin', 'docter', 'nurse', 'patient'],
+      enum: ['system_admin', 'hospital_admin', 'doctor', 'nurse', 'patient'],
     },
     isActive: { type: Boolean },
   },

@@ -52,9 +52,6 @@ const _Hospital = require('../models/hospital');
 // };
 exports.protect = async (req, res, next) => {
   try {
-    console.log('Full Request Headers:', req.headers);
-     console.log('Full Cookies:', req.cookies);
-     console.log('Authorization Header:', req.headers.authorization);
     let token;
 
     // Lấy token từ header Authorization nếu có
@@ -75,20 +72,9 @@ exports.protect = async (req, res, next) => {
       });
     }
 
-    // Verify token
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (verifyError) {
-      console.error('Token Verification Error:', verifyError);
-      return res.status(401).json({
-        status: 'fail',
-        message: 'Invalid or expired token',
-      });
-    }
-
-    // Find user
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const currentUser = await _Account.findById(decoded.accountId);
+
     if (!currentUser) {
       return res.status(401).json({
         status: 'fail',
@@ -131,14 +117,8 @@ exports.protect = async (req, res, next) => {
       });
     }
 
-    // Set comprehensive user object
-    req.user = {
-      _id: currentUser._id,
-      role: currentUser.role,
-      fullName: userDetails.fullName,
-      model: modelName
-    };
-
+    req.user = currentUser;
+    req.userDecoded = decoded;
     next();
   } catch (err) {
     console.error('FULL MIDDLEWARE ERROR:', err);
@@ -165,7 +145,6 @@ exports.restrictTo = (...roles) => {
 exports.adminOnly = (req, res, next) => {
   console.log('check req.user.role', req.user.role);
   if (req.user.role !== 'system_admin') {
-    console.log('check req.role', req.user.role);
     return res.status(403).json({
       status: 'fail',
       message: 'This route is restricted to admin users only.',
@@ -176,7 +155,6 @@ exports.adminOnly = (req, res, next) => {
 
 exports.hospitalOnly = (req, res, next) => {
   if (req.user.role !== 'hospital_admin') {
-    console.log('check req.role', req.user.role);
     return res.status(403).json({
       status: 'fail',
       message: 'This route is restricted to admin users only.',
@@ -185,18 +163,17 @@ exports.hospitalOnly = (req, res, next) => {
   next();
 };
 
-exports.hospitalOrAdminOnly = (req, res, next) => {
+exports.doctorOrAdmin = (req, res, next) => {
   if (!['hospital_admin', 'system_admin'].includes(req.user.role)) {
     return res.status(403).json({
       status: 'fail',
-      message: 'This route is restricted to hospital admin, system admin users only.',
+      message: 'This route is restricted to system admin and hospital admin',
     });
   }
   next();
 };
 
 exports.patientOnly = (req, res, next) => {
-  console.log('check req.user.role', req.user.role);
   if (req.user.role !== 'patiend') {
     console.log('check req.role', req.user.role);
     return res.status(403).json({

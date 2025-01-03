@@ -1,22 +1,22 @@
-const Booking = require('../models/Booking');
+const Booking = require('../models/appointment');
 
 exports.createBooking = async (req, res) => {
   try {
-    const { fullName,  email, phoneNumber } = req.body;
+    const { fullName, email, phoneNumber } = req.body;
     const newBooking = new Booking({
       fullName,
       email,
-      phoneNumber
+      phoneNumber,
     });
     const savedBooking = await newBooking.save();
     res.status(201).json({
       message: 'Đăng ký thành công',
-      data: savedBooking
+      data: savedBooking,
     });
   } catch (error) {
     res.status(400).json({
       message: 'Đăng ký thất bại',
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -26,12 +26,12 @@ exports.getAllBookings = async (req, res) => {
     const bookings = await Booking.find();
     res.status(200).json({
       message: 'Lấy danh sách đăng ký thành công',
-      data: bookings
+      data: bookings,
     });
   } catch (error) {
     res.status(500).json({
       message: 'Lấy danh sách đăng ký thất bại',
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -44,12 +44,12 @@ exports.getBookingById = async (req, res) => {
     }
     res.status(200).json({
       message: 'Lấy thông tin đăng ký thành công',
-      data: booking
+      data: booking,
     });
   } catch (error) {
     res.status(500).json({
       message: 'Lấy thông tin đăng ký thất bại',
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -62,12 +62,12 @@ exports.deleteBooking = async (req, res) => {
     }
     res.status(200).json({
       message: 'Xóa đăng ký thành công',
-      data: booking
+      data: booking,
     });
   } catch (error) {
     res.status(500).json({
       message: 'Xóa đăng ký thất bại',
-      error: error.message
+      error: error.message,
     });
   }
 };
