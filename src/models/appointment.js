@@ -9,19 +9,20 @@ const WorkingHourSchema = new mongoose.Schema({
 const appointmentSchema = new mongoose.Schema(
   {
     patientId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    doctorId: { type: Schema.Types.ObjectId, ref: 'Doctor', required: true },
-    hospitalId: { type: Schema.Types.ObjectId, ref: 'Hospital', required: true },
+    doctor: { type: Schema.Types.ObjectId, ref: 'Doctor', required: true },
+    hospital: { type: Schema.Types.ObjectId, ref: 'Hospital', required: true },
     orderId: { type: String, required: true },
     date: { type: Date, required: true },
     price: { type: String, required: true },
     hours: { type: [WorkingHourSchema], required: true },
-    paymentStatus: {
+    status: {
       type: String,
-      enum: ['pending', 'paid', 'failed'],
+      enum: ['pending', 'paid', 'completed', 'canceled'],
       default: 'pending',
     },
     note: { type: String },
     paymentMethod: { type: String },
+    paymentStatus: { type: String },
   },
   { timestamps: true },
 );

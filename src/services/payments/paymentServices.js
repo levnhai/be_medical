@@ -4,6 +4,9 @@ const querystring = require('querystring');
 const crypto = require('crypto');
 const _Appointment = require('../../models/appointment');
 const _Payment = require('../../models/payment');
+const appointment = require('../../models/appointment');
+
+
 
 // thanh toán tại phòng khám
 const handleCreateAppointment = (formData) => {
@@ -15,8 +18,8 @@ const handleCreateAppointment = (formData) => {
       console.log('check hours', hours);
       const appointment = await _Appointment.create({
         patientId,
-        doctorId,
-        hospitalId,
+        doctor: doctorId,
+        hospital: hospitalId,
         date,
         hours,
         price,
@@ -35,6 +38,45 @@ const handleCreateAppointment = (formData) => {
         status: paymentMethod === 'cash' ? 'pending' : 'processing',
       });
       resolve({ code: 200, message: 'Tạo lịch hẹn thành công', status: true, appointment });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+const handleGetAppointmentByUserId = (patientId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      console.log('check patientId 1', patientId);
+
+      const data = {
+        pending: [],
+        paid: [],
+        completed: [],
+        canceled: [],
+      };
+
+      const appointment = await _Appointment.find({ patientId }).populate('doctor').populate('hospital');
+
+      appointment.forEach((item, index) => {
+        switch (item.status) {
+          case 'pending':
+            data.pending.push(item);
+            break;
+          case 'paid':
+            data.paid.push(item);
+            break;
+          case 'completed':
+            data.completed.push(item);
+            break;
+          case 'canceled':
+            data.canceled.push(item);
+            break;
+          default:
+            break;
+        }
+      });
+      resolve({ code: 200, message: 'Lấy dữ liệu thành công', status: true, data });
     } catch (error) {
       reject(error);
     }
@@ -125,4 +167,5 @@ module.exports = {
   createPaymentUrl,
   verifyPayment,
   handleCreateAppointment,
+  handleGetAppointmentByUserId,
 };

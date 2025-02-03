@@ -39,5 +39,17 @@ class PaymentController {
       next(error);
     }
   }
+
+  async handleGetAppointmentByUserId(req, res, next) {
+    try {
+      let { patientId } = req.body;
+
+      console.log('check patientId', patientId);
+      const result = await PaymentServices.handleGetAppointmentByUserId(patientId);
+      return res.status(result.code).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 module.exports = new PaymentController();
