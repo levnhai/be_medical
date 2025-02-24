@@ -21,6 +21,7 @@ class AuthController {
       let { phoneNumber, password } = req.body;
       console.log('check phone number', phoneNumber);
       const result = await AuthServices.handleSingIn({ phoneNumber, password });
+      console.log('check result', result);
       return res.status(result.code).json({
         result,
       });
@@ -74,6 +75,8 @@ class AuthController {
     const { formData } = req.body;
     console.log('check formData', formData);
     const result = await AuthServices.handleSingUp(formData);
+    console.log('check result', result);
+
     return res.status(result.code).json({
       result,
     });

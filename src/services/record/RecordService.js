@@ -14,6 +14,7 @@ const handleCreateRecord = (formData) => {
         ethnic,
         street,
         gender,
+        birthdate,
         provinceId,
         districtId,
         wardId,
@@ -31,6 +32,7 @@ const handleCreateRecord = (formData) => {
         wardName,
         street,
       };
+
       const record = await _Record.create({
         userId,
         fullName,
@@ -39,11 +41,11 @@ const handleCreateRecord = (formData) => {
         cccd,
         email,
         gender,
+        birthdate,
         ethnic,
         address,
       });
 
-      console.log('check formData', userId);
       resolve({ code: 200, message: 'Thêm thành công', status: true, record });
     } catch (error) {
       reject(error);
@@ -67,8 +69,34 @@ const handlegetRecordById = (recordId) => {
     }
   });
 };
+const handleDeleteRecord = (recordId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const existingRecord = await _Record.findById(recordId);
+      if (!existingRecord) {
+        resolve({
+          code: 404,
+          message: 'Không tìm thấy hồ sơ bệnh nhân',
+          status: false,
+        });
+        return;
+      }
+
+      await _Record.findByIdAndDelete(recordId);
+
+      resolve({
+        code: 200,
+        message: 'Xóa bác sĩ thành công',
+        status: true,
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
 
 module.exports = {
   handleCreateRecord,
   handlegetRecordById,
+  handleDeleteRecord,
 };

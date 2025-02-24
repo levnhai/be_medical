@@ -244,7 +244,7 @@ const handleDeleteDoctor = (docterId) => {
 
       resolve({
         code: 200,
-        message: 'Xóa bác sĩ thành công',
+        message: 'Xóa hồ sơ thành công',
         status: true,
       });
     } catch (error) {

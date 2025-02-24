@@ -1,9 +1,9 @@
 const bcrypt = require('bcryptjs');
 const salt = bcrypt.genSaltSync(10);
-const mongoose = require('mongoose');
+const { mongoose } = require('../../config/database');
 
 const _Account = require('../../models/account');
-const _Docter = require('../../models/doctor');
+const _Doctor = require('../../models/doctor');
 const _Hospital = require('../../models/hospital');
 const _User = require('../../models/user');
 const _Otp = require('../../models/otp');
@@ -31,12 +31,12 @@ const handleLoginAdmin = ({ phoneNumber, password }) => {
             userData = hospital;
             break;
 
-          case 'docter':
-            const docter = await _Docter.findOne({ accountId: account.id });
-            if (!docter) {
+          case 'doctor':
+            const doctor = await _Doctor.findOne({ accountId: account.id });
+            if (!doctor) {
               resolve({ code: 404, message: 'docter profile not found', status: false });
             }
-            userData = docter;
+            userData = doctor;
             break;
           default:
             resolve({ code: 400, message: 'Invalid role', status: false });
@@ -62,18 +62,23 @@ const handleSingIn = ({ phoneNumber, password }) => {
   return new Promise(async (resolve, reject) => {
     try {
       if (phoneNumber && password) {
-        const account = await _Account.findOne({ phoneNumber });
+        let userData = {};
+
+        const account = await _Account.findOne({ phoneNumber, role: 'patient' });
         console.log('check access', account);
         if (!account) {
           resolve({ code: 200, message: 'Tài khoản không tồn tại', status: false });
-        }
-        let userData = {};
-        if (account.role === 'patient') {
-          userData = await _User.findOne({ accountId: account.id });
         } else {
-          resolve({ code: 400, message: 'Tài khoản không tồn tại', status: false });
+          userData = await _User.findOne({ accountId: account.id });
         }
-        const token = generateJWTToken({ account, userData });
+
+        console.log('check 1 ', userData);
+        // if (account.role === 'patient') {
+        //   userData = await _User.findOne({ accountId: account.id });
+        // } else {
+        //   resolve({ code: 400, message: 'Tài khoản không tồn tại', status: false });
+        // }
+        const token = await generateJWTToken({ account, userData });
         const isPassword = await bcrypt.compare(password, account.password);
         isPassword
           ? resolve({ code: 200, messagr: 'Đăng nhập thành công', status: true, token, userData })
@@ -92,7 +97,10 @@ const handleCheckPhoneExists = (phoneNumber) => {
     try {
       let isCheckPhoneExists = await _Account.findOne({
         phoneNumber,
+        role: 'patient',
       });
+
+      console.log('chekc isCheckPhoneExists', isCheckPhoneExists);
 
       if (isCheckPhoneExists) {
         resolve({ code: 200, message: 'Số điện thoại đã tồn tại', exists: true });
@@ -155,24 +163,53 @@ const handleVerifyOtp = (phoneNumber, otp) => {
 const handleSingUp = (formData) => {
   return new Promise(async (resolve, reject) => {
     try {
+      const session = await mongoose.startSession(); // Khởi tạo session từ mongoose
+      session.startTransaction();
       const { fullName, phoneNumber, password, reEnterPassword, referralCode } = formData;
-      const checkPhoneExists = await isCheckPhoneExists(phoneNumber);
+      // const checkPhoneExists = await isCheckPhoneExists(phoneNumber);
+      let checkPhoneExists = await _Account.findOne({
+        phoneNumber,
+        role: 'patient',
+      });
+
+      console.log('check checkPhoneExists', checkPhoneExists);
+
+      // if (checkPhoneExists && checkPhoneExists.role === 'patient') {
+      //   resolve({ code: 200, message: 'Số điện thoại đã tồn tại', status: false });
+      // }
+
       if (!checkPhoneExists) {
         if (password === reEnterPassword) {
           const hashReEnterPassword = await bcrypt.hashSync(reEnterPassword, salt);
 
-          const account = await _Account.create({
-            phoneNumber,
-            password: hashReEnterPassword,
-            role: 'patient',
-          });
-          const user = await _User.create({
-            accountId: account._id,
-            fullName,
-            referralCode,
-          });
-          resolve({ code: 201, message: 'Tạo thành công', status: true, user });
+          const account = await _Account.create(
+            [
+              {
+                phoneNumber,
+                password: hashReEnterPassword,
+                role: 'patient',
+              },
+            ],
+            { session },
+          );
+
+          const userData = await _User.create(
+            [
+              {
+                accountId: account[0]._id,
+                fullName,
+                referralCode,
+              },
+            ],
+            { session },
+          );
+          await session.commitTransaction();
+          session.endSession();
+          resolve({ code: 201, message: 'Tạo thành công', status: true, userData: userData[0] });
         } else {
+          // Nếu xảy ra lỗi, rollback
+          await session.abortTransaction();
+          session.endSession();
           resolve({ code: 200, message: 'Mật khẩu không khớp', status: false });
         }
       } else {
@@ -212,13 +249,13 @@ const handleForgotPassword = ({ phoneNumber, password, reEnterPassword }) => {
     try {
       console.log('check form data: ', phoneNumber, password, reEnterPassword);
       if (password === reEnterPassword) {
-        const user = await _User.findOne({ phoneNumber });
-        if (!user) {
+        const account = await _Account.findOne({ phoneNumber });
+        if (!account) {
           resolve({ code: 200, message: 'Người dùng không tồn tại', status: false });
         }
         const hastPassword = await bcrypt.hashSync(password, salt);
         const hastReEnterPassword = await bcrypt.hashSync(reEnterPassword, salt);
-        await _User.findOneAndUpdate(
+        await _Account.findOneAndUpdate(
           { phoneNumber },
           { password: hastPassword, reEnterPassword: hastReEnterPassword },
           { new: true },

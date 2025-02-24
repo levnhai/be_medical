@@ -5,21 +5,21 @@ const crypto = require('crypto');
 const _Appointment = require('../../models/appointment');
 const _Payment = require('../../models/payment');
 const appointment = require('../../models/appointment');
-
-
+const emailServices = require('../email/emailServices');
 
 // thanh toán tại phòng khám
 const handleCreateAppointment = (formData) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log('check form data', formData);
-      const { patientId, doctorId, hospitalId, date, hours, price, status, paymentStatus, paymentMethod, orderId } =
+      const { patientId, doctor, hospital, date, hours, price, status, paymentStatus, paymentMethod, orderId } =
         formData;
-      console.log('check hours', hours);
+      console.log('check patient', patientId);
+
+      await emailServices.handleSendSimpleEmail({ formData });
       const appointment = await _Appointment.create({
-        patientId,
-        doctor: doctorId,
-        hospital: hospitalId,
+        patientId: patientId?.userId,
+        doctor: doctor?.id,
+        hospital: hospital?.id,
         date,
         hours,
         price,
@@ -32,7 +32,7 @@ const handleCreateAppointment = (formData) => {
       await _Payment.create({
         appointmentId: appointment._id,
         orderId,
-        patientId,
+        patientId: patientId?.userId,
         price,
         paymentMethod,
         status: paymentMethod === 'cash' ? 'pending' : 'processing',
