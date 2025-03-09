@@ -87,9 +87,9 @@ exports.protect = async (req, res, next) => {
     let modelName;
 
     switch (currentUser.role) {
-      case 'docter':
+      case 'doctor':
         userDetails = await _Doctor.findOne({ accountId: currentUser._id });
-        modelName = 'Docter';
+        modelName = 'Doctor';
         break;
 
       case 'hospital_admin':

@@ -19,7 +19,9 @@ class RecordController {
   }
 
   async handleDeleteRecord(req, res, next) {
-    const { recordId } = req.body;
+    const recordId = req.params.id;
+    console.log('check delete', recordId);
+
     let result = await RecordService.handleDeleteRecord(recordId);
     return res.status(result.code).json({
       result,

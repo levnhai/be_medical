@@ -9,7 +9,7 @@ const _Account = require('../../models/account');
 const handleGetAllHospital = () => {
   return new Promise(async (resolve, reject) => {
     try {
-      const data = await _Hospital.find({}, '-password -reEnterPassword');
+      const data = await _Hospital.find({}).populate('accountId');
       resolve({ code: 200, message: 'Lấy dữ liệu thành công', status: true, total: data.length, data });
     } catch (error) {
       reject(error);

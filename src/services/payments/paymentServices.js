@@ -4,7 +4,6 @@ const querystring = require('querystring');
 const crypto = require('crypto');
 const _Appointment = require('../../models/appointment');
 const _Payment = require('../../models/payment');
-const appointment = require('../../models/appointment');
 const emailServices = require('../email/emailServices');
 
 // thanh toán tại phòng khám
@@ -17,6 +16,7 @@ const handleCreateAppointment = (formData) => {
 
       await emailServices.handleSendSimpleEmail({ formData });
       const appointment = await _Appointment.create({
+        record: patientId?._id,
         patientId: patientId?.userId,
         doctor: doctor?.id,
         hospital: hospital?.id,

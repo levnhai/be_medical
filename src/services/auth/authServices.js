@@ -7,6 +7,7 @@ const _Doctor = require('../../models/doctor');
 const _Hospital = require('../../models/hospital');
 const _User = require('../../models/user');
 const _Otp = require('../../models/otp');
+const _Admin = require('../../models/admin');
 
 const { generateJWTToken } = require('../../utils/generateJWTToken');
 const { generateOTP } = require('../../utils/generateOTP');
@@ -18,10 +19,17 @@ const handleLoginAdmin = ({ phoneNumber, password }) => {
   return new Promise(async (resolve, reject) => {
     try {
       if (phoneNumber && password) {
+        console.log('check phone number', phoneNumber);
         const account = await _Account.findOne({ phoneNumber });
+        console.log('check  account', account);
         let userData = {};
         switch (account.role) {
           case 'system_admin':
+            const system_admin = await _Admin.findOne({ accountId: account.id });
+            if (!system_admin) {
+              resolve({ code: 404, message: 'system_admin not found for this admin', status: false });
+            }
+            userData = system_admin;
             break;
           case 'hospital_admin':
             const hospital = await _Hospital.findOne({ accountId: account.id });
@@ -30,11 +38,12 @@ const handleLoginAdmin = ({ phoneNumber, password }) => {
             }
             userData = hospital;
             break;
-
           case 'doctor':
+            console.log('thanh cong');
             const doctor = await _Doctor.findOne({ accountId: account.id });
+            console.log('check doctor', doctor);
             if (!doctor) {
-              resolve({ code: 404, message: 'docter profile not found', status: false });
+              resolve({ code: 404, message: 'doctor profile not found', status: false });
             }
             userData = doctor;
             break;

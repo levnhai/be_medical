@@ -1,10 +1,10 @@
 const _Schedule = require('../../models/schedules');
 
 // handle create specialty
-const handleCreateSchedule = ({ doctorId, hospitalId, date, hours }) => {
+const handleCreateSchedule = (formData) => {
   return new Promise(async (resolve, reject) => {
-    console.log('check hour', hours);
     try {
+      const { doctorId, hospitalId, date, hours } = formData;
       // Lấy tất cả lịch làm việc của bác sĩ trong ngày
       const existingSchedules = await _Schedule.find({ doctor: doctorId, date });
 

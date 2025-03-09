@@ -8,6 +8,7 @@ const WorkingHourSchema = new mongoose.Schema({
 
 const appointmentSchema = new mongoose.Schema(
   {
+    record: { type: Schema.Types.ObjectId, ref: 'Record', required: true },
     patientId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     doctor: { type: Schema.Types.ObjectId, ref: 'Doctor', required: true },
     hospital: { type: Schema.Types.ObjectId, ref: 'Hospital', required: true },

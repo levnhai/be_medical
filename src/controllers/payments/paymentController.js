@@ -33,6 +33,7 @@ class PaymentController {
   async handleClinicCreate(req, res, next) {
     try {
       let { formData } = req.body;
+      console.log('checking', formData);
       const result = await PaymentServices.handleCreateAppointment(formData);
       return res.status(result.code).json(result);
     } catch (error) {
@@ -43,8 +44,6 @@ class PaymentController {
   async handleGetAppointmentByUserId(req, res, next) {
     try {
       let { patientId } = req.body;
-
-      console.log('check patientId', patientId);
       const result = await PaymentServices.handleGetAppointmentByUserId(patientId);
       return res.status(result.code).json(result);
     } catch (error) {

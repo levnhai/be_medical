@@ -12,9 +12,12 @@ const specialtyRoutes = require('./specialty');
 const scheduleRoutes = require('./schedule');
 const recordRoutes = require('./record');
 const paymentRoutes = require('./payment');
+const appointmentRoutes = require('./appointment');
+const adminRoutes = require('./admin');
+const dashBoardRoutes = require('./dashboard');
 
 function route(app) {
-  app.use('/', homeRouter);
+  // app.use('/', homeRouter);
   app.use('/news', newsRouter);
   app.use('/categorynews', categorynewsRouter);
   app.use('/registrations', registrationRoutes);
@@ -28,5 +31,8 @@ function route(app) {
   app.use('/auth', authRoutes);
   app.use('/record', recordRoutes);
   app.use('/payment', paymentRoutes);
+  app.use('/appointment', appointmentRoutes);
+  app.use('/admin', adminRoutes);
+  app.use('/', dashBoardRoutes);
 }
 module.exports = route;

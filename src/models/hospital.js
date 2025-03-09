@@ -18,18 +18,21 @@ const ServiceSchema = new Schema({
   specialties: [SpecialtySchema],
 });
 
-const Hospital = new Schema({
-  accountId: Schema.Types.ObjectId,
-  fullName: { type: 'string', required: true },
-  workingTime: { type: 'string' },
-  contentHTML: { type: 'string' },
-  contentMarkdown: { type: 'string' },
-  hospitalType: { type: 'string', required: true },
-  description: { type: 'string' },
-  address: [AddressSchema],
-  // services: [ServiceSchema],
-  image: { type: Buffer, contentType: String, required: true },
-  rating: { type: 'Number', default: 0 },
-});
+const Hospital = new Schema(
+  {
+    accountId: Schema.Types.ObjectId,
+    fullName: { type: 'string', required: true },
+    workingTime: { type: 'string' },
+    contentHTML: { type: 'string' },
+    contentMarkdown: { type: 'string' },
+    hospitalType: { type: 'string', required: true },
+    description: { type: 'string' },
+    address: [AddressSchema],
+    // services: [ServiceSchema],
+    image: { type: Buffer, contentType: String, required: true },
+    rating: { type: 'Number', default: 0 },
+  },
+  { timestamps: true },
+);
 
 module.exports = mongoose.model('Hospital', Hospital);

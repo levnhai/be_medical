@@ -15,8 +15,8 @@ const { generateOTP } = require('../../utils/generateOTP');
 const handleGetAllUsers = () => {
   return new Promise(async (resolve, reject) => {
     try {
-      const user = await _User.find({}, '-password -reEnterPassword');
-      resolve({ code: 200, message: 'Lấy dữ liệu thành công', status: true, user });
+      const user = await _User.find({}, '-password -reEnterPassword').populate('accountId', '-password -role');
+      resolve({ code: 200, message: 'Lấy dữ liệu thành công', total: user.length, status: true, user });
     } catch (error) {
       reject(error);
     }

@@ -54,7 +54,6 @@ const handleCreateRecord = (formData) => {
 };
 const handlegetRecordById = (recordId) => {
   return new Promise(async (resolve, reject) => {
-    console.log('check recordById', recordId);
     try {
       const data = await _Record.find({ userId: recordId });
       resolve({
@@ -86,7 +85,7 @@ const handleDeleteRecord = (recordId) => {
 
       resolve({
         code: 200,
-        message: 'Xóa bác sĩ thành công',
+        message: 'Xóa hồ sơ thành công',
         status: true,
       });
     } catch (error) {
