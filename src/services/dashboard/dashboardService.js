@@ -9,7 +9,8 @@ const _Appointment = require('../../models/appointment');
 const handleGetAllStats = () => {
   return new Promise(async (resolve, reject) => {
     try {
-      const [hospitalCount, doctorCount, newCount, userCount] = await Promise.all([
+      const [hospitalData, hospitalCount, doctorCount, newCount, userCount] = await Promise.all([
+        _Hospital.find({}),
         _Hospital.countDocuments(),
         _Doctor.countDocuments(),
         _NewPost.countDocuments(),
@@ -17,6 +18,7 @@ const handleGetAllStats = () => {
       ]);
 
       const data = {
+        hospitalData,
         hospitalCount,
         doctorCount,
         newCount,
@@ -37,7 +39,6 @@ const handleGetAllStats = () => {
 const handleGetAllStatsByHospital = (hospitalId) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log('check hosspiral', hospitalId);
       const [doctorCount, appointment, appointmentCount, newCount, userCount] = await Promise.all([
         _Doctor.countDocuments({ hospital: hospitalId }),
         _Appointment.find({ hospital: hospitalId }).populate('record', 'fullName phoneNumber'),
@@ -45,8 +46,13 @@ const handleGetAllStatsByHospital = (hospitalId) => {
         _NewPost.countDocuments(),
         _User.countDocuments(),
       ]);
+
+      const amountTotal = Number(
+        appointment?.filter((item) => item?.status === 'paid').reduce((sum, item) => sum + item.price, 0),
+      );
       const data = {
         appointment,
+        amountTotal,
         doctorCount,
         appointmentCount,
         newCount,
