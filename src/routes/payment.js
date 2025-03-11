@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const axios = require('axios');
 const _Appointment = require('../models/appointment');
 const _Payment = require('../models/payment');
+const _Schedule = require('../models/schedules');
 const emailServices = require('../services/email/emailServices');
 
 // const dateFormat = require('dateformat');
@@ -16,6 +17,29 @@ const tmnCode = 'LRD5R4EO';
 const secretKey = 'TZFO1AB3EAV43RYJBWPS5WRE4POR2IFL';
 const vnpUrl = 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
 const returnUrl = 'http://localhost:3000/user'; // URL chuyển hướng sau khi thanh toán
+
+const updateBookingStatus = async (doctorId, date, hourId, isBooked) => {
+  try {
+    const formattedDate = new Date(date + 'T00:00:00.000Z');
+    const schedule = await _Schedule.findOne({ doctor: doctorId, date: formattedDate });
+
+    if (!schedule) {
+      return { success: false, message: 'Lịch khám không tồn tại' };
+    }
+
+    const hourIndex = schedule.hours.findIndex((hour) => hour._id.toString() === hourId);
+    if (hourIndex === -1) {
+      return { success: false, message: 'Khung giờ không tồn tại' };
+    }
+
+    schedule.hours[hourIndex].isBooked = isBooked;
+    await schedule.save();
+
+    return { success: true, message: 'Cập nhật thành công', schedule };
+  } catch (error) {
+    return { success: false, message: 'Lỗi cập nhật', error };
+  }
+};
 
 // thanh toán với vnpay
 router.post('/payment-vnpay', (req, res) => {
@@ -98,7 +122,7 @@ router.post('/payment-momo', async (req, res) => {
   var orderInfo = 'Thanh toán lịch khám bệnh';
   var partnerCode = 'MOMO';
   var redirectUrl = 'http://localhost:3000/user';
-  var ipnUrl = 'https://e2a0-2001-ee0-53de-40f0-9c44-a558-db8d-85bb.ngrok-free.app/payment/callback';
+  var ipnUrl = 'https://403e-115-75-177-83.ngrok-free.app/payment/callback';
   var requestType = 'payWithMethod';
   var amount = price;
   var orderId = partnerCode + new Date().getTime();
@@ -168,8 +192,8 @@ router.post('/payment-momo', async (req, res) => {
   let result;
   try {
     result = await axios(options);
-    console.log('check result', result);
     await emailServices.handleSendSimpleEmail({ formData });
+    await updateBookingStatus(doctor?.id, date, hours?.timeId, true);
     const appointment = await _Appointment.create({
       record: patientId?._id,
       patientId: patientId?.userId,
@@ -202,8 +226,6 @@ router.post('/callback', async (req, res) => {
     resultCode = 9000: giao dịch được cấp quyền (authorization) thành công .
     resultCode <> 0: giao dịch thất bại.
    */
-  console.log('callback: hải lê ');
-  console.log('hải lê', req.body);
   const { orderId, resultCode } = req.body;
   const status = resultCode === 0 ? 'paid' : 'pending';
 

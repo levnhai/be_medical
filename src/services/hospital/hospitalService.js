@@ -4,6 +4,7 @@ const salt = bcrypt.genSaltSync(10);
 const _Hospital = require('../../models/hospital');
 const { isCheckPhoneExists } = require('../../utils/checkPhoneExists');
 const _Account = require('../../models/account');
+const { mongoose } = require('../../config/database');
 
 // handle get all hospital
 const handleGetAllHospital = () => {
@@ -85,9 +86,9 @@ const handleGetCountHospitalByType = (search) => {
 // handle create hospital
 const handleCreateHospital = (formData) => {
   return new Promise(async (resolve, reject) => {
+    const session = await mongoose.startSession(); // Khởi tạo session từ mongoose
+    session.startTransaction(); // Bắt đầu transaction
     try {
-      const session = await mongoose.startSession(); // Khởi tạo session từ mongoose
-      session.startTransaction(); // Bắt đầu transaction
       const {
         fullName,
         phoneNumber,

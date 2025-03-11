@@ -33,7 +33,6 @@ class PaymentController {
   async handleClinicCreate(req, res, next) {
     try {
       let { formData } = req.body;
-      console.log('checking', formData);
       const result = await PaymentServices.handleCreateAppointment(formData);
       return res.status(result.code).json(result);
     } catch (error) {

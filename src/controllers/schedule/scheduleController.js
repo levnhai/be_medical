@@ -10,9 +10,10 @@ class ScheduleController {
     });
   }
 
-  async handleGetScheduleByHospital(req, res, next) {
-    const hospitalId = req.userDecoded.id;
-    let result = await ScheduleServices.handleGetAllScheduleByHospital(hospitalId);
+  async handleGetSchedule(req, res, next) {
+    const userLogin = req.userDecoded.id;
+    const role = req.userDecoded.role;
+    let result = await ScheduleServices.handleGetSchedule({ userLogin, role });
     return res.status(result.code).json({
       result,
     });

@@ -4,6 +4,7 @@ const WorkingHourSchema = new mongoose.Schema({
   start: { type: Date, required: true },
   end: { type: Date, required: true },
   price: { type: String, required: true },
+  isBooked: { type: Boolean, default: false },
 });
 
 const SchedulesSchema = new mongoose.Schema(

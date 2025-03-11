@@ -2,7 +2,9 @@ const dashboardService = require('../../services/dashboard/dashboardService');
 
 class DashboardController {
   async getAllStats(req, res, next) {
-    let result = await dashboardService.handleGetAllStats();
+    const userLogin = req.userDecoded.id;
+    const role = req.userDecoded.role;
+    let result = await dashboardService.handleGetAllStats({ userLogin, role });
     return res.status(result.code).json({
       result,
     });
