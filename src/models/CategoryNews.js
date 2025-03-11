@@ -5,6 +5,7 @@ const categoryNewsSchema = new mongoose.Schema({
   name: { type: String, required: true },
   slug: { type: String, unique: true }, 
   description: { type: String },
+  status: { type: Number, default: 1 },
   createdAt: { type: Date, default: Date.now },
 });
 

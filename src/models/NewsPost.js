@@ -19,7 +19,7 @@ const newsPostSchema = new mongoose.Schema({
     },
     required: true
   },
-  authorModel: {type: String, required: true, enum: ['Hospital', 'Docter']},
+  authorModel: {type: String, required: true, enum: ['Hospital', 'Doctor']},
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   slug: { type: String, required: true, unique: true },

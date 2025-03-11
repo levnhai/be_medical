@@ -29,14 +29,19 @@ exports.createCategory = async (req, res) => {
   try {
     console.log('Request body:', req.body);
 
-    // Access the nested formData object
-    const { name, description, status } = req.body.formData;
+    const formData = req.body.formData || {};
+    const { name, description } = formData;
+    let { status } = formData;
 
     if (!name) {
       return res.status(400).json({ message: 'Name is required' });
     }
 
-    // Create a new category with the received data
+    if (status === undefined) {
+      status = 1;
+    }
+
+    // Tạo mới thể loại
     const newCategory = new CategoryNews({ name, description, status });
     await newCategory.save();
 
@@ -55,8 +60,9 @@ exports.updateCategory = async (req, res) => {
       return res.status(400).json({ message: 'Invalid category ID' });
     }
 
-    const { name, description } = req.body;
-    const updateFields = { name, description, updatedAt: new Date() };
+    const { name, description, status } = req.body;
+
+    const updateFields = { name, description, status, updatedAt: new Date() };
 
     Object.keys(updateFields).forEach(
       (key) => updateFields[key] === undefined && delete updateFields[key]
