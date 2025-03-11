@@ -25,7 +25,47 @@ class newController {
       });
     }
   }
+  async getMyPosts(req, res) {
+    try {
+      if (req.user.role !== 'doctor') {
+        return res.status(403).json({
+          message: 'Không có quyền truy cập',
+          status: false
+        });
+      }
   
+      const result = await newService.handleGetPostsByAuthor(req.user.modelId, 'Doctor');
+      return res.status(result.code).json({
+        result
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Lỗi hệ thống',
+        error: error.message
+      });
+    }
+  }
+  // Add this to newController.js
+async getHospitalAndDoctorPosts(req, res) {
+  try {
+    if (req.user.role !== 'hospital_admin') {
+      return res.status(403).json({
+        message: 'Không có quyền truy cập',
+        status: false
+      });
+    }
+    
+    const result = await newService.handleGetHospitalAndDoctorsPosts(req.user.modelId);
+    return res.status(result.code).json({
+      result
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Lỗi hệ thống',
+      error: error.message
+    });
+  }
+}
    // get post by id
    async getPostById(req, res) {
     const postId = req.params.id;
@@ -43,9 +83,9 @@ class newController {
     try {
       console.log('Full Request User:', req.user);
       console.log('Request Body:', req.body);
- 
+      
       const postData = req.body;
- 
+      
       // Validate required fields
       if (!postData.title || !postData.content || !postData.category || !postData.imageUrl) {
         return res.status(400).json({
@@ -53,22 +93,22 @@ class newController {
           status: false
         });
       }
- 
+      
       // Extra safety checks
-      if (!req.user || !req.user._id || !req.user.fullName) {
+      if (!req.user || !req.user.modelId) {
         return res.status(401).json({
           message: 'Thông tin người dùng không hợp lệ',
           status: false
         });
       }
- 
-      // Sử dụng thông tin người dùng từ middleware
+      
+      // Use information from req.user attached in middleware
       postData.author = {
-        _id: req.user._id,
+        _id: req.user.modelId,
         fullName: req.user.fullName
       };
       postData.authorModel = req.user.model;
- 
+      
       const result = await newService.handleCreatePost(postData);
       return res.status(result.code).json({ result });
     } catch (error) {
@@ -80,7 +120,7 @@ class newController {
         errorStack: error.stack
       });
     }
- }
+  }
   // Update post
   async updatePost(req, res) {
     try {

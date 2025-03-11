@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const dotenv = require('dotenv');
 const _New = require('../models/NewsPost');
+const _Doctor = require('../models/doctor')
 const CategoryNews = require('../models/CategoryNews');
 const NewsPost = require('../models/NewsPost');
 const mongoose = require('mongoose');
@@ -32,6 +33,65 @@ const handleGetAllPostsAdmin = () => {
       });
     } catch (error) {
       reject(error);
+    }
+  });
+};
+const handleGetPostsByAuthor = (authorId, authorModel) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const posts = await NewsPost.find({
+        'author._id': authorId,
+        'authorModel': authorModel
+      })
+      .populate('category')
+      .sort({ createdAt: -1 });
+
+      resolve({
+        message: 'Lấy dữ liệu thành công',
+        status: true,
+        posts,
+        code: 200
+      });
+    } catch (error) {
+      reject({
+        message: 'Lấy dữ liệu thất bại',
+        status: false,
+        error: error.message,
+        code: 500
+      });
+    }
+  });
+};
+const handleGetHospitalAndDoctorsPosts = (hospitalId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Get all doctors associated with this hospital
+      const doctors = await _Doctor.find({ hospital: hospitalId });
+      const doctorIds = doctors.map(doctor => doctor._id);
+      
+      // Find posts from both the hospital and its doctors
+      const posts = await NewsPost.find({
+        $or: [
+          { 'author._id': hospitalId, 'authorModel': 'Hospital' },
+          { 'author._id': { $in: doctorIds }, 'authorModel': 'Doctor' }
+        ]
+      })
+      .populate('category')
+      .sort({ createdAt: -1 });
+
+      resolve({
+        message: 'Lấy dữ liệu thành công',
+        status: true,
+        posts,
+        code: 200
+      });
+    } catch (error) {
+      reject({
+        message: 'Lấy dữ liệu thất bại',
+        status: false,
+        error: error.message,
+        code: 500
+      });
     }
   });
 };
@@ -301,4 +361,6 @@ module.exports = {
     handleGetAllPostsAdmin,
     handleGetRelatedNews,
     handleGetMostViewedNews,
+    handleGetPostsByAuthor,
+    handleGetHospitalAndDoctorsPosts,
 };
