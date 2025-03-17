@@ -1,4 +1,5 @@
 const _Appointment = require('../../models/appointment');
+const _Payment = require('../../models/payment');
 
 const handleGetAppointmentByHospital = ({ userLogin, role }) => {
   return new Promise(async (resolve, reject) => {
@@ -8,7 +9,6 @@ const handleGetAppointmentByHospital = ({ userLogin, role }) => {
       if (role === 'hospital_admin') {
         // data = await _Appointment.find();
         data = await _Appointment.find({ hospital: userLogin }).populate('doctor').populate('record');
-        console.log('beenj vieenj');
       } else if (role === 'doctor') {
         data = await _Appointment.find({ doctor: userLogin }).populate('doctor').populate('record');
       } else {
@@ -22,6 +22,23 @@ const handleGetAppointmentByHospital = ({ userLogin, role }) => {
   });
 };
 
+const handleUpdateStatus = ({ status, id }) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const updatedAppointment = await _Appointment.findByIdAndUpdate(id, { status }, { new: true });
+      if (!updatedAppointment) {
+        resolve({ code: 400, message: 'Không tìm thấy lịch hẹn', status: false });
+      }
+      if (status === 'Completed') {
+        await _Payment.findOneAndUpdate({ appointmentId: id }, { status: 'paid' }, { new: true, upsert: true });
+      }
+      resolve({ code: 200, message: 'Cập nhật trạng thái thành công', status: true });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
 module.exports = {
   handleGetAppointmentByHospital,
+  handleUpdateStatus,
 };

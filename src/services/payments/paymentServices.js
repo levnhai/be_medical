@@ -23,7 +23,6 @@ const handleCreateAppointment = (formData) => {
         date,
         hours,
         price,
-        status,
         paymentStatus,
         paymentMethod,
         orderId,

@@ -20,7 +20,7 @@ const ServiceSchema = new Schema({
 
 const Hospital = new Schema(
   {
-    accountId: Schema.Types.ObjectId,
+    accountId: { type: mongoose.Schema.Types.ObjectId, ref: 'Account', required: true },
     fullName: { type: 'string', required: true },
     workingTime: { type: 'string' },
     contentHTML: { type: 'string' },
@@ -29,6 +29,8 @@ const Hospital = new Schema(
     description: { type: 'string' },
     address: [AddressSchema],
     // services: [ServiceSchema],
+    monthlyFee: Number,
+    renewalStatus: { type: Boolean, default: false },
     image: { type: Buffer, contentType: String, required: true },
     rating: { type: 'Number', default: 0 },
   },

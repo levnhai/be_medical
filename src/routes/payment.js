@@ -122,7 +122,7 @@ router.post('/payment-momo', async (req, res) => {
   var orderInfo = 'Thanh toán lịch khám bệnh';
   var partnerCode = 'MOMO';
   var redirectUrl = 'http://localhost:3000/user';
-  var ipnUrl = 'https://403e-115-75-177-83.ngrok-free.app/payment/callback';
+  var ipnUrl = 'https://36cc-2001-ee0-53d7-33a0-fc39-768a-dece-d54f.ngrok-free.app/payment/callback';
   var requestType = 'payWithMethod';
   var amount = price;
   var orderId = partnerCode + new Date().getTime();
@@ -202,7 +202,6 @@ router.post('/payment-momo', async (req, res) => {
       date,
       hours,
       price,
-      status,
       paymentStatus,
       paymentMethod,
       orderId: result?.data?.orderId,

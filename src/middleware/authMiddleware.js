@@ -122,14 +122,16 @@ exports.protect = async (req, res, next) => {
       });
     }
 
-    // Attach to request object
+    req.user = currentUser;
+    req.userDecoded = decoded;
+    // // Attach to request object
     req.user = {
       ...currentUser.toObject(),
       modelId,
       model: modelName,
-      fullName: userDetails.fullName || currentUser.fullName || 'Unknown'
+      fullName: userDetails.fullName || currentUser.fullName || 'Unknown',
     };
-    
+
     next();
   } catch (err) {
     console.error('FULL MIDDLEWARE ERROR:', err);
@@ -198,17 +200,17 @@ exports.checkPostOwnership = async (req, res, next) => {
   try {
     const postId = req.params.id;
     const NewsPost = require('../models/NewsPost');
-    
+
     // Tìm bài viết theo id
     const post = await NewsPost.findById(postId);
-    
+
     if (!post) {
       return res.status(404).json({
         status: 'fail',
         message: 'Không tìm thấy bài viết',
       });
     }
-    
+
     // Nếu là bác sĩ, kiểm tra xem có phải là tác giả hay không
     if (req.user.role === 'doctor') {
       if (post.author._id.toString() !== req.user.modelId.toString()) {
@@ -218,7 +220,7 @@ exports.checkPostOwnership = async (req, res, next) => {
         });
       }
     }
-    
+
     req.post = post; // Đính kèm bài viết vào request để sử dụng sau này
     next();
   } catch (error) {

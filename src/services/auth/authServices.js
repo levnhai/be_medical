@@ -19,31 +19,45 @@ const handleLoginAdmin = ({ phoneNumber, password }) => {
   return new Promise(async (resolve, reject) => {
     try {
       if (phoneNumber && password) {
-        console.log('check phone number', phoneNumber);
+        // console.log('check phone number', phoneNumber);
         const account = await _Account.findOne({ phoneNumber });
-        console.log('check  account', account);
+        // console.log('check  account', account);
         let userData = {};
         switch (account.role) {
           case 'system_admin':
             const system_admin = await _Admin.findOne({ accountId: account.id });
             if (!system_admin) {
-              resolve({ code: 404, message: 'system_admin not found for this admin', status: false });
+              resolve({ code: 200, message: 'Tài khoản không tồn tại hoặc sai thông tin đăng nhập', status: false });
             }
             userData = system_admin;
             break;
           case 'hospital_admin':
             const hospital = await _Hospital.findOne({ accountId: account.id });
             if (!hospital) {
-              resolve({ code: 404, message: 'Hospital not found for this admin', status: false });
+              resolve({ code: 200, message: 'Tài khoản không tồn tại hoặc sai thông tin đăng nhập', status: false });
+            }
+            console.log('check hospital', hospital);
+            if (!hospital?.renewalStatus) {
+              resolve({
+                code: 200,
+                message: 'Dịch vụ của bạn đã hết hạn.',
+                status: false,
+              });
             }
             userData = hospital;
             break;
           case 'doctor':
-            console.log('thanh cong');
-            const doctor = await _Doctor.findOne({ accountId: account.id });
-            console.log('check doctor', doctor);
+            const doctor = await _Doctor.findOne({ accountId: account.id }).populate('hospital');
             if (!doctor) {
-              resolve({ code: 404, message: 'doctor profile not found', status: false });
+              resolve({ code: 200, message: 'Tài khoản không tồn tại hoặc sai thông tin đăng nhập', status: false });
+            }
+            console.log('check doctor', doctor);
+            if (!doctor?.hospital?.renewalStatus) {
+              resolve({
+                code: 200,
+                message: 'Dịch vụ của bạn đã hết hạn',
+                status: false,
+              });
             }
             userData = doctor;
             break;
@@ -54,10 +68,10 @@ const handleLoginAdmin = ({ phoneNumber, password }) => {
         const token = generateJWTToken({ account, userData });
         const isPassword = await bcrypt.compare(password, account.password);
         isPassword
-          ? resolve({ code: 200, messagr: 'Đăng nhập thành công', status: true, token, userData })
-          : resolve({ code: 200, messagr: 'Mật khẩu không trùng khớp', status: false });
+          ? resolve({ code: 200, message: 'Đăng nhập thành công', status: true, token, userData })
+          : resolve({ code: 200, message: 'mật khẩu không đungs', status: false });
       } else {
-        resolve({ code: 200, messagr: 'Nhập các trường bắt buộc', status: false });
+        resolve({ code: 200, message: 'Nhập các trường bắt buộc', status: false });
       }
     } catch (error) {
       reject(error);

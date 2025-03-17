@@ -106,21 +106,27 @@ const handleCreateHospital = (formData) => {
         wardId,
         wardName,
         description,
+        monthlyFee,
+        renewalStatus,
       } = formData;
       const address = { districtId, districtName, provinceId, provinceName, street, wardId, wardName };
 
       const isCheckphoneExists = await isCheckPhoneExists(phoneNumber);
       if (isCheckphoneExists) {
-        resolve({ code: 400, message: 'Số điện thoại đã tồn tại', status: false });
+        await session.abortTransaction();
+        session.endSession();
+        resolve({ code: 200, message: 'Số điện thoại đã tồn tại', status: false });
         return;
       }
 
       if (password !== reEnterPassword) {
-        resolve({ code: 400, message: 'Nhập mật khẩu không trùng khớp', status: false });
+        await session.abortTransaction();
+        session.endSession();
+        resolve({ code: 200, message: 'Nhập mật khẩu không trùng khớp', status: false });
         return;
       }
 
-      let hastpassword = await bcrypt.hashSync(password, salt);
+      let hastpassword = await bcrypt.hash(password, salt);
 
       const account = await _Account.create(
         [
@@ -136,25 +142,51 @@ const handleCreateHospital = (formData) => {
         },
       );
 
+      // Tạo tài khoản trước
+      // const account = new _Account({
+      //   phoneNumber,
+      //   email,
+      //   password: hastpassword,
+      //   role: 'hospital_admin',
+      // });
+
+      // await account.save({ session });
+
       const hospital = await _Hospital.create(
         [
           {
-            accountId: account._id,
+            accountId: account[0]._id,
             fullName,
             workingTime,
             hospitalType,
             image,
             address,
             description,
+            monthlyFee,
+            renewalStatus,
           },
         ],
         session,
       );
+
+      // const hospital = new _Hospital({
+      //   accountId: account._id,
+      //   fullName,
+      //   workingTime,
+      //   hospitalType,
+      //   image,
+      //   address,
+      //   description,
+      //   monthlyFee,
+      //   renewalStatus,
+      // });
+
+      // await hospital.save({ session });
+      console.log('check hopsial', hospital);
       await session.commitTransaction();
       session.endSession();
       resolve({ code: 200, message: 'Thêm bệnh viện thành công', status: true, hospital });
     } catch (error) {
-      // Nếu xảy ra lỗi, rollback
       await session.abortTransaction();
       session.endSession();
       reject(error);

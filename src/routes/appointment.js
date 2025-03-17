@@ -5,5 +5,6 @@ const { protect, adminOnly, hospitalOnly } = require('../middleware/authMiddlewa
 
 // router.post('/create-appointment', appointmentController.createAppointment);
 router.get('/get-all-appointment-by-hospital', protect, appointmentController.handleGetAppointmentByHospital);
+router.put('/update-status/:id', protect, appointmentController.handleUpdateStatus);
 
 module.exports = router;

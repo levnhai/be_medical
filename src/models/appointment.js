@@ -18,8 +18,8 @@ const appointmentSchema = new mongoose.Schema(
     hours: { type: [WorkingHourSchema], required: true },
     status: {
       type: String,
-      enum: ['pending', 'paid', 'completed', 'canceled'],
-      default: 'pending',
+      enum: ['Booked', 'Completed', 'Cancelled'],
+      default: 'Booked',
     },
     note: { type: String },
     paymentMethod: { type: String },
