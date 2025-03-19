@@ -79,6 +79,7 @@ const handleCreateDoctor = (formData) => {
             gender,
             address,
             image,
+            email,
             hospital: hospitalId,
             specialty: specialtyId,
           },
@@ -256,8 +257,10 @@ const handleDeleteDoctor = (docterId) => {
 const handleGetDoctorByHospital = (hospitalId) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const data = await _Doctor.find({ hospital: hospitalId }).populate('specialty').populate('hospital');
+      console.time('response in');
+      const data = await _Doctor.find({ hospital: hospitalId }).populate('specialty').populate('hospital').lean();
 
+      console.timeEnd('response in');
       resolve({
         code: 200,
         message: 'Lấy dữ liệu thành công',

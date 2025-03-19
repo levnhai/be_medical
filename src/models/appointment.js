@@ -23,7 +23,7 @@ const appointmentSchema = new mongoose.Schema(
     },
     note: { type: String },
     paymentMethod: { type: String },
-    paymentStatus: { type: String },
+    paymentStatus: { type: String, default: 'pending' },
   },
   { timestamps: true },
 );

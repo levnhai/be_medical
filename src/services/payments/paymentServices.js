@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const _Appointment = require('../../models/appointment');
 const _Payment = require('../../models/payment');
 const emailServices = require('../email/emailServices');
+const scheduleServices = require('../schedule/scheduleServices');
 
 // thanh toán tại phòng khám
 const handleCreateAppointment = (formData) => {
@@ -12,9 +13,12 @@ const handleCreateAppointment = (formData) => {
     try {
       const { patientId, doctor, hospital, date, hours, price, status, paymentStatus, paymentMethod, orderId } =
         formData;
-      console.log('check patient', patientId);
+      console.log('check doctor?.id', doctor?.id);
+      console.log('check date', date);
+      console.log('check hours?.timeId', hours?.timeId);
 
       await emailServices.handleSendSimpleEmail({ formData });
+      await scheduleServices.updateBookingStatus(doctor?.id, date, hours?.timeId, true);
       const appointment = await _Appointment.create({
         record: patientId?._id,
         patientId: patientId?.userId,
@@ -58,7 +62,7 @@ const handleGetAppointmentByUserId = (patientId) => {
       const appointment = await _Appointment.find({ patientId }).populate('doctor').populate('hospital');
 
       appointment.forEach((item, index) => {
-        switch (item.status) {
+        switch (item.paymentStatus) {
           case 'pending':
             data.pending.push(item);
             break;

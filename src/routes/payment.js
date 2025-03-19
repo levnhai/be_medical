@@ -8,8 +8,7 @@ const _Appointment = require('../models/appointment');
 const _Payment = require('../models/payment');
 const _Schedule = require('../models/schedules');
 const emailServices = require('../services/email/emailServices');
-
-// const dateFormat = require('dateformat');
+const scheduleServices = require('../services/schedule/scheduleServices');
 
 const paymentController = require('../controllers/payments/paymentController');
 
@@ -17,29 +16,6 @@ const tmnCode = 'LRD5R4EO';
 const secretKey = 'TZFO1AB3EAV43RYJBWPS5WRE4POR2IFL';
 const vnpUrl = 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
 const returnUrl = 'http://localhost:3000/user'; // URL chuyển hướng sau khi thanh toán
-
-const updateBookingStatus = async (doctorId, date, hourId, isBooked) => {
-  try {
-    const formattedDate = new Date(date + 'T00:00:00.000Z');
-    const schedule = await _Schedule.findOne({ doctor: doctorId, date: formattedDate });
-
-    if (!schedule) {
-      return { success: false, message: 'Lịch khám không tồn tại' };
-    }
-
-    const hourIndex = schedule.hours.findIndex((hour) => hour._id.toString() === hourId);
-    if (hourIndex === -1) {
-      return { success: false, message: 'Khung giờ không tồn tại' };
-    }
-
-    schedule.hours[hourIndex].isBooked = isBooked;
-    await schedule.save();
-
-    return { success: true, message: 'Cập nhật thành công', schedule };
-  } catch (error) {
-    return { success: false, message: 'Lỗi cập nhật', error };
-  }
-};
 
 // thanh toán với vnpay
 router.post('/payment-vnpay', (req, res) => {
@@ -122,7 +98,7 @@ router.post('/payment-momo', async (req, res) => {
   var orderInfo = 'Thanh toán lịch khám bệnh';
   var partnerCode = 'MOMO';
   var redirectUrl = 'http://localhost:3000/user';
-  var ipnUrl = 'https://36cc-2001-ee0-53d7-33a0-fc39-768a-dece-d54f.ngrok-free.app/payment/callback';
+  var ipnUrl = 'https://8548-2001-ee0-53d7-33a0-15a9-c1ea-b33d-718.ngrok-free.app/payment/callback';
   var requestType = 'payWithMethod';
   var amount = price;
   var orderId = partnerCode + new Date().getTime();
@@ -193,7 +169,8 @@ router.post('/payment-momo', async (req, res) => {
   try {
     result = await axios(options);
     await emailServices.handleSendSimpleEmail({ formData });
-    await updateBookingStatus(doctor?.id, date, hours?.timeId, true);
+    // await updateBookingStatus(doctor?.id, date, hours?.timeId, true);
+    await scheduleServices.updateBookingStatus(doctor?.id, date, hours?.timeId, true);
     const appointment = await _Appointment.create({
       record: patientId?._id,
       patientId: patientId?.userId,
@@ -228,37 +205,13 @@ router.post('/callback', async (req, res) => {
   const { orderId, resultCode } = req.body;
   const status = resultCode === 0 ? 'paid' : 'pending';
 
-  await _Appointment.findOneAndUpdate({ orderId: orderId }, { status: status }, { new: true });
-
+  await _Appointment.findOneAndUpdate({ orderId: orderId }, { paymentStatus: status }, { new: true });
   await _Payment.findOneAndUpdate({ orderId: orderId }, { status: status }, { new: true });
-
-  /**
-   * Dựa vào kết quả này để update trạng thái đơn hàng
-   * Kết quả log:
-   * {
-        partnerCode: 'MOMO',
-        orderId: 'MOMO1712108682648',
-        requestId: 'MOMO1712108682648',
-        amount: 10000,
-        orderInfo: 'pay with MoMo',
-        orderType: 'momo_wallet',
-        transId: 4014083433,
-        resultCode: 0,
-        message: 'Thành công.',
-        payType: 'qr',
-        responseTime: 1712108811069,
-        extraData: '',
-        signature: '10398fbe70cd3052f443da99f7c4befbf49ab0d0c6cd7dc14efffd6e09a526c0'
-      }
-   */
-
   return res.status(204).json(req.body);
 });
 router.post('/check-status-transaction', async (req, res) => {
   const { orderId } = req.body;
 
-  // const signature = accessKey=$accessKey&orderId=$orderId&partnerCode=$partnerCode
-  // &requestId=$requestId
   var secretKey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
   var accessKey = 'F8BBA842ECF85';
   const rawSignature = `accessKey=${accessKey}&orderId=${orderId}&partnerCode=MOMO&requestId=${orderId}`;

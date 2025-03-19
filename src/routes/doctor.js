@@ -7,7 +7,7 @@ router.post('/create-doctor', protect, hospitalOnly, doctorController.handleCrea
 router.get('/get-all-doctor', doctorController.handleGetAllDoctor);
 router.put('/update-doctor/:id', doctorController.handleUpdateDoctor);
 router.delete('/delete-doctor/:id', doctorController.handleDeleteDoctor);
-router.post('/get-doctor-by-hospital', protect, doctorController.handleGetDoctorByHospital);
+router.post('/get-doctor-by-hospital', doctorController.handleGetDoctorByHospital);
 router.post('/get-doctor-by-hospital-doctor', doctorController.handleGetDoctorByHospitalAndDoctor);
 
 module.exports = router;

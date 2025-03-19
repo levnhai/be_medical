@@ -10,6 +10,7 @@ const Doctor = new Schema(
     address: [AddressSchema],
     schedules: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Schedule' }],
     gender: { type: 'string' },
+    email: { type: 'string' },
     positionId: { type: 'string' },
     price: { type: 'string' },
     hospital: { type: Schema.Types.ObjectId, ref: 'Hospital', required: true },
