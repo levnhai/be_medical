@@ -33,15 +33,19 @@ const handleCreateDoctor = (formData) => {
         hospitalId,
         specialtyId,
       } = formData;
-      const address = {
-        provinceId,
-        districtId,
-        wardId,
-        provinceName,
-        districtName,
-        wardName,
-        street,
-      };
+      const address = [
+        {
+          provinceId,
+          districtId,
+          wardId,
+          provinceName,
+          districtName,
+          wardName,
+          street,
+        },
+      ];
+
+      console.log('check address', address);
 
       const isCheckPhoneExist = await isCheckPhoneExists(phoneNumber);
       if (isCheckPhoneExist) {
@@ -89,6 +93,8 @@ const handleCreateDoctor = (formData) => {
 
       await session.commitTransaction();
       session.endSession();
+
+      console.log('check doctor', doctor);
 
       resolve({ code: 200, message: 'Tạo người dùng thành công', status: true, doctor });
     } catch (error) {
@@ -142,7 +148,7 @@ const handleGetAllDoctor = () => {
   });
 };
 
-const handleUpdateDoctor = (docterId, updateData) => {
+const handleUpdateDoctor = (doctorId, updateData) => {
   return new Promise(async (resolve, reject) => {
     try {
       const {
@@ -165,8 +171,8 @@ const handleUpdateDoctor = (docterId, updateData) => {
       } = updateData;
 
       // Kiểm tra bác sĩ có tồn tại không
-      const existingDocter = await _Doctor.findById(docterId);
-      if (!existingDocter) {
+      const existingDoctor = await _Doctor.findById(doctorId);
+      if (!existingDoctor) {
         resolve({
           code: 404,
           message: 'Không tìm thấy bác sĩ',
@@ -176,11 +182,12 @@ const handleUpdateDoctor = (docterId, updateData) => {
       }
 
       // Kiểm tra số điện thoại mới có trùng với bác sĩ khác không
-      if (phoneNumber !== existingDocter.phoneNumber) {
+      if (phoneNumber !== existingDoctor.phoneNumber) {
         const isPhoneExists = await isCheckPhoneExists(phoneNumber);
+        console.log('is checkPhoneExists', isPhoneExists);
         if (isPhoneExists) {
           resolve({
-            code: 400,
+            code: 200,
             message: 'Số điện thoại đã tồn tại',
             status: false,
           });
@@ -198,9 +205,9 @@ const handleUpdateDoctor = (docterId, updateData) => {
         street,
       };
 
-      const updatedDocter = await _Doctor
+      const updatedDoctor = await _Doctor
         .findByIdAndUpdate(
-          docterId,
+          doctorId,
           {
             fullName,
             phoneNumber,
@@ -220,7 +227,7 @@ const handleUpdateDoctor = (docterId, updateData) => {
         code: 200,
         message: 'Cập nhật thông tin bác sĩ thành công',
         status: true,
-        data: updatedDocter,
+        data: updatedDoctor,
       });
     } catch (error) {
       reject(error);

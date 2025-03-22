@@ -46,8 +46,6 @@ class userController {
   // handle create user
   async handleCreateUser(req, res) {
     const formData = req.body;
-    console.log('check formData', formData);
-
     const result = await userServices.handleCreateUser(formData);
     return res.status(result.code).json({
       result,

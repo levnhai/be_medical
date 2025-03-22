@@ -204,33 +204,29 @@ const handleEditHospital = (hospitalId, formData) => {
         hospitalType,
         email,
         image,
-        districtId,
-        districtName,
-        provinceId,
-        provinceName,
+        district,
+        province,
         street,
-        wardId,
-        wardName,
+        ward,
         description,
       } = formData;
 
       // Construct address object
       const address = [
         {
-          // Notice the array wrapper to match schema
-          districtId,
-          districtName,
-          provinceId,
-          provinceName,
+          districtId: district?.id,
+          districtName: district?.name,
+          provinceId: province?.id,
+          provinceName: province?.name,
           street,
-          wardId,
-          wardName,
+          wardId: ward?.id,
+          wardName: ward?.name,
         },
       ];
 
       // Find and update the hospital
       const updatedHospital = await _Hospital.findByIdAndUpdate(
-        hospitalId, // Remove the object wrapper
+        hospitalId,
         {
           fullName,
           phoneNumber,
@@ -238,7 +234,7 @@ const handleEditHospital = (hospitalId, formData) => {
           hospitalType,
           email,
           image,
-          address, // Use the address array
+          address,
           description,
         },
         { new: true, runValidators: true },

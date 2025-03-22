@@ -124,11 +124,13 @@ const handleCreateUser = (formData) => {
 
       const isCheckPhoneExist = await isCheckPhoneExists(phoneNumber);
       if (isCheckPhoneExist) {
-        resolve({ code: 200, message: 'Số điện thoại đã tồn tại', status: false });
+        console.log('hải lê');
+        return resolve({ code: 200, message: 'Số điện thoại đã tồn tại', status: false });
       }
+      console.log('lỗi');
 
-      if (password !== reEnterPassword) {
-        resolve({ code: 200, message: 'Nhập mật khẩu không trùng khớp', status: false });
+      if (password !== reEnterPassword) { 
+        return resolve({ code: 200, message: 'Nhập mật khẩu không trùng khớp', status: false });
       }
 
       let hastpassword = await bcrypt.hashSync(password, salt);

@@ -43,6 +43,8 @@ class HospitalController {
   async handleEditHospital(req, res, next) {
     const hospitalId = req.params.hospitalId;
     const formData = req.body;
+
+    console.log('cheeck formData', formData);
     let result = await HospitalServices.handleEditHospital(hospitalId, formData);
     return res.status(result.code).json({
       result,

@@ -31,6 +31,7 @@ const handleUpdateStatus = ({ status, id }) => {
       }
       if (status === 'Completed') {
         await _Payment.findOneAndUpdate({ appointmentId: id }, { status: 'paid' }, { new: true, upsert: true });
+        await _Appointment.findByIdAndUpdate(id, { paymentStatus: 'paid' }, { new: true, upsert: true });
       }
       resolve({ code: 200, message: 'Cập nhật trạng thái thành công', status: true });
     } catch (error) {

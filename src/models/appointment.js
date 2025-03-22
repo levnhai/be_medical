@@ -18,7 +18,7 @@ const appointmentSchema = new mongoose.Schema(
     hours: { type: [WorkingHourSchema], required: true },
     status: {
       type: String,
-      enum: ['Booked', 'Completed', 'Cancelled'],
+      enum: ['Booked', 'Completed', 'canceled'],
       default: 'Booked',
     },
     note: { type: String },

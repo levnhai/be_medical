@@ -23,9 +23,9 @@ class DoctorController {
 
   async handleUpdateDoctor(req, res, next) {
     try {
-      const docterId = req.params.id;
+      const doctorId = req.params.id;
       const updateData = req.body;
-      const result = await DoctorServices.handleUpdateDocter(docterId, updateData);
+      const result = await DoctorServices.handleUpdateDoctor(doctorId, updateData);
       return res.status(result.code).json({
         result,
       });
