@@ -39,7 +39,34 @@ const handleUpdateStatus = ({ status, id }) => {
     }
   });
 };
+
+const handleDeleteAppointment = ({ id }) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Kiểm tra xem lịch hẹn có tồn tại không
+      const appointment = await _Appointment.findById(id);
+      if (!appointment) {
+        return resolve({ code: 404, message: 'Không tìm thấy lịch hẹn', status: false });
+      }
+
+      // Xóa thanh toán liên quan nếu có
+      await _Payment.findOneAndDelete({ appointmentId: id });
+      
+      // Xóa lịch hẹn
+      await _Appointment.findByIdAndDelete(id);
+      
+      resolve({ 
+        code: 200, 
+        message: 'Xóa lịch hẹn thành công', 
+        status: true 
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
 module.exports = {
   handleGetAppointmentByHospital,
   handleUpdateStatus,
+  handleDeleteAppointment,
 };

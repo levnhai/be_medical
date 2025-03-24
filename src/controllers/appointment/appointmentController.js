@@ -23,5 +23,16 @@ class AppointmentController {
       });
     }
   }
+
+  async handleDeleteAppointment(req, res, next) {
+    try {
+      const { id } = req.params;
+      const result = await AppointmentServices.handleDeleteAppointment({ id });
+      return res.status(result.code).json({ result });
+    } catch (error) {
+      next(error);
+    }
+  }
+  
 }
 module.exports = new AppointmentController();

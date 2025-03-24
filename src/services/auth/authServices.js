@@ -69,7 +69,7 @@ const handleLoginAdmin = ({ phoneNumber, password }) => {
         const isPassword = await bcrypt.compare(password, account.password);
         isPassword
           ? resolve({ code: 200, message: 'Đăng nhập thành công', status: true, token, userData })
-          : resolve({ code: 200, message: 'mật khẩu không đungs', status: false });
+          : resolve({ code: 200, message: 'mật khẩu không đúng', status: false });
       } else {
         resolve({ code: 200, message: 'Nhập các trường bắt buộc', status: false });
       }
