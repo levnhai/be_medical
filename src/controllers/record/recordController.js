@@ -27,6 +27,16 @@ class RecordController {
       result,
     });
   }
+
+  async handleUpdateRecord(req, res, next) {
+    const recordId = req.params.id;
+    const formData = req.body;
+
+    let result = await RecordService.handleUpdateRecord(recordId, formData);
+    return res.status(result.code).json({
+      result,
+    });
+  }
 }
 
 module.exports = new RecordController();

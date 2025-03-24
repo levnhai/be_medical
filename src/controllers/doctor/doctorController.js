@@ -21,6 +21,17 @@ class DoctorController {
     }
   }
 
+  async handleGetTopDoctor(req, res, next) {
+    {
+      let limit = req.query.limit;
+      if (!limit) limit = 10;
+      const result = await DoctorServices.handleGetTopDoctor(limit);
+      return res.status(result.code).json({
+        result,
+      });
+    }
+  }
+
   async handleUpdateDoctor(req, res, next) {
     try {
       const doctorId = req.params.id;

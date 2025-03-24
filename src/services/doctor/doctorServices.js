@@ -6,6 +6,7 @@ const { mongoose } = require('../../config/database');
 const _Doctor = require('../../models/doctor');
 const _Account = require('../../models/account');
 const { isCheckPhoneExists } = require('../../utils/checkPhoneExists');
+const { promises } = require('nodemailer/lib/xoauth2');
 
 const handleCreateDoctor = (formData) => {
   return new Promise(async (resolve, reject) => {
@@ -136,11 +137,22 @@ const handleGetAllDoctor = () => {
         },
         {
           $addFields: {
-            hospitalData: { $arrayElemAt: ['$hospitalData', 0] }, // giảm số lượng mảng
+            hospitalData: { $arrayElemAt: ['$hospitalData', 0] },
             specialtyData: { $arrayElemAt: ['$specialtyData', 0] },
           },
         },
       ]);
+      resolve({ code: 200, message: 'Lấy dữ liệu thành công', status: true, total: data.length, data });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+const handleGetTopDoctor = (limit) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const data = await _Doctor.find().populate('specialty').limit(limit);
       resolve({ code: 200, message: 'Lấy dữ liệu thành công', status: true, total: data.length, data });
     } catch (error) {
       reject(error);
@@ -314,4 +326,5 @@ module.exports = {
   handleDeleteDoctor,
   handleGetDoctorByHospital,
   handleGetDoctorByHospitalAndDoctor,
+  handleGetTopDoctor,
 };

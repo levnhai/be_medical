@@ -94,8 +94,83 @@ const handleDeleteRecord = (recordId) => {
   });
 };
 
+const handleUpdateRecord = (recordId, formData ) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      console.log('formData', formData);
+      const {
+        fullName,
+        phoneNumber,
+        email,
+        job,
+        cccd,
+        gender,
+        ethnic,
+        birthdate,
+        provinceId,
+        districtId,
+        wardId,
+        provinceName,
+        districtName,
+        wardName,
+        street,
+      } = formData;
+
+      const existingRecord = await _Record.findById(recordId);
+
+      console.log('check existingRecord', fullName);
+      if (!existingRecord) {
+        resolve({
+          code: 404,
+          message: 'Không tìm thấy hồ sơ bệnh nhân',
+          status: false,
+        });
+        return;
+      }
+
+      const address = {
+        provinceId,
+        districtId,
+        wardId,
+        provinceName,
+        districtName,
+        wardName,
+        street,
+      };
+
+      const updateRecord = await _Record.findByIdAndUpdate(
+        recordId,
+        {
+          fullName,
+          phoneNumber,
+          email,
+          gender,
+          job,
+          cccd,
+          ethnic,
+          birthdate,
+          address,
+        },
+        { new: true },
+      );
+
+      console.log('check updateRecord', updateRecord);
+
+      resolve({
+        code: 200,
+        message: 'Cập nhật thông tin hồ sơ thành công',
+        status: true,
+        data: updateRecord,
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 module.exports = {
   handleCreateRecord,
   handlegetRecordById,
   handleDeleteRecord,
+  handleUpdateRecord,
 };
