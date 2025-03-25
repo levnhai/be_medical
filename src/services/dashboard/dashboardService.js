@@ -139,22 +139,68 @@ const handleGetAllStats = ({ userLogin, role }) => {
           revenueByMonth,
         };
       } else if (role === 'doctor') {
-        const [appointment, appointmentCount, newCount, userCount] = await Promise.all([
-          _Appointment.find({ hospital: userLogin }).populate('record', 'fullName phoneNumber'),
-          _Appointment.countDocuments({ doctor: userLogin }),
-          _NewPost.countDocuments(),
-          _User.countDocuments(),
-        ]);
+        const [appointment, appointmentCount, appointmentSuccess, appointmentFailed, newCount, userCount] =
+          await Promise.all([
+            _Appointment.find({ doctor: userLogin }).populate('record', 'fullName phoneNumber'),
+            _Appointment.countDocuments({ doctor: userLogin }),
+            _Appointment.countDocuments({ doctor: userLogin, status: 'Completed' }),
+            _Appointment.countDocuments({ doctor: userLogin, status: 'canceled' }),
+            _NewPost.countDocuments(),
+            _User.countDocuments(),
+          ]);
 
-        const amountTotal = Number(
-          appointment?.filter((item) => item?.status === 'paid').reduce((sum, item) => sum + item.price, 0),
-        );
+        const appointmentIds = appointment.map((appt) => appt._id);
+
+        const payments = await _Payment.find({
+          appointmentId: { $in: appointmentIds },
+          status: 'paid',
+          createdAt: {
+            $gte: new Date(`${currentYear}-01-01T00:00:00.000Z`),
+            $lt: new Date(`${currentYear + 1}-01-01T00:00:00.000Z`),
+          },
+        });
+
+        const appointmentByYear = await _Appointment.find({
+          doctor: userLogin,
+          createdAt: {
+            $gte: new Date(`${currentYear}-01-01T00:00:00.000Z`),
+            $lt: new Date(`${currentYear + 1}-01-01T00:00:00.000Z`),
+          },
+        });
+
+        const appointmentByMonth = Array.from({ length: 12 }, (_, i) => ({
+          month: `Tháng ${i + 1}`,
+          count: 0,
+        }));
+
+        appointmentByYear.forEach((appt) => {
+          const monthIndex = new Date(appt.createdAt).getMonth();
+          appointmentByMonth[monthIndex].count += 1;
+        });
+        // tính doanh thu theo hàng tháng
+        const revenueByMonth = Array.from({ length: 12 }, (_, i) => ({
+          month: `Tháng ${i + 1}`,
+          total: 0,
+        }));
+
+        payments.forEach((payment) => {
+          const date = new Date(payment.createdAt);
+          const monthIndex = date.getMonth(); // Lấy chỉ số tháng (0-11)
+          revenueByMonth[monthIndex].total += payment.price;
+        });
+
+        // tổng doanh thu
+        const amountTotal = payments.reduce((sum, payment) => sum + payment.price, 0);
         data = {
           appointment,
           amountTotal,
           appointmentCount,
           newCount,
           userCount,
+          revenueByMonth,
+          appointmentByMonth,
+          appointmentSuccess,
+          appointmentFailed,
         };
       }
 
