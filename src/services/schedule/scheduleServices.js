@@ -81,14 +81,18 @@ const handleGetAllScheduleByDoctor = (doctorId) => {
 const updateBookingStatus = async (doctorId, date, hourId, isBooked) => {
   try {
     const formattedDate = new Date(date + 'T00:00:00.000Z');
-    const schedule = await _Schedule.findOne({ doctor: doctorId, date: formattedDate });
+    const schedule = await _Schedule.findOne({ doctor: doctorId, date: formattedDate, 'hours._id': hourId });
     console.log('check schedule', schedule);
+    console.log('check hourId', hourId);
 
     if (!schedule) {
+      console.log('hải lê');
       return { success: false, message: 'Lịch khám không tồn tại' };
     }
 
     const hourIndex = schedule.hours.findIndex((hour) => hour._id.toString() === hourId);
+
+    console.log('check hourIndex', hourIndex);
     if (hourIndex === -1) {
       return { success: false, message: 'Khung giờ không tồn tại' };
     }

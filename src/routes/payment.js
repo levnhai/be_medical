@@ -7,6 +7,7 @@ const axios = require('axios');
 const _Appointment = require('../models/appointment');
 const _Payment = require('../models/payment');
 const _Schedule = require('../models/schedules');
+const { notifyDoctor } = require('../socket');
 const emailServices = require('../services/email/emailServices');
 const scheduleServices = require('../services/schedule/scheduleServices');
 
@@ -192,6 +193,8 @@ router.post('/payment-momo', async (req, res) => {
       paymentMethod,
       status: 'pending',
     });
+    notifyDoctor(doctor?.id, formData);
+
     return res.status(200).json(result.data);
   } catch (error) {}
 });

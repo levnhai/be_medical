@@ -6,6 +6,7 @@ const _Appointment = require('../../models/appointment');
 const _Payment = require('../../models/payment');
 const emailServices = require('../email/emailServices');
 const scheduleServices = require('../schedule/scheduleServices');
+const { notifyDoctor } = require('../../socket');
 
 // thanh toán tại phòng khám
 const handleCreateAppointment = (formData) => {
@@ -13,9 +14,8 @@ const handleCreateAppointment = (formData) => {
     try {
       const { patientId, doctor, hospital, date, hours, price, status, paymentStatus, paymentMethod, orderId } =
         formData;
-      console.log('check doctor?.id', doctor?.id);
-      console.log('check date', date);
-      console.log('check hours?.timeId', hours?.timeId);
+
+      console.log('chec hours', hours);
 
       await emailServices.handleSendSimpleEmail({ formData });
       await scheduleServices.updateBookingStatus(doctor?.id, date, hours?.timeId, true);
@@ -31,6 +31,9 @@ const handleCreateAppointment = (formData) => {
         paymentMethod,
         orderId,
       });
+
+      // Gửi sự kiện real-time
+      notifyDoctor(doctor?.id, formData);
 
       await _Payment.create({
         appointmentId: appointment._id,

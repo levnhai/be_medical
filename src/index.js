@@ -7,8 +7,11 @@ const db = require('./config/database');
 const methodOverride = require('method-override');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
+const { socketSetup } = require('./socket');
+const http = require('http');
 
 const app = express();
+const server = http.createServer(app);
 const port = 8080;
 
 //HTTP logger
@@ -55,9 +58,15 @@ app.use(methodOverride('_method'));
 // cookie
 app.use(cookieParser());
 
+// Setup WebSocket (Socket.io)
+socketSetup(server);
+
 // router init
-app.listen(port, () => {
-  console.log(`App listening on port ${port}`);
+// app.listen(port, () => {
+//   console.log(`App listening on port ${port}`);
+// });
+server.listen(port, () => {
+  console.log(` Server running on http://localhost:${port}`);
 });
 
 db.Connect();
