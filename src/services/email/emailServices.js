@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const { extractTime } = require('../../utils/time');
 require('dotenv').config();
 
 const handleSendSimpleEmail = async ({ formData }) => {
@@ -24,7 +25,7 @@ const handleSendSimpleEmail = async ({ formData }) => {
     <p>👉 Bác sĩ phụ trách: <b>${formData?.doctor?.fullName}</b></p>
     <p>👉 Họ và tên: <b>${formData?.doctor?.specialty}</b></p>
     <p>👉 Ngày khám: <b>${formData?.date}</b></p>
-    <p>👉 Giờ khám: <b>${formData?.date}</b></p>
+    <p>👉 Giờ khám: <b>${extractTime(formData?.hours?.start)} - ${extractTime(formData?.hours?.end)}</b></p>
     <p>👉 Địa điểm: <b>${formData?.hospital?.address}</b></p>
     <b>🔹 Lưu ý quan trọng: </b>
     <p>✔️ Vui lòng đến trước giờ hẹn [X] phút để hoàn tất thủ tục.</p>

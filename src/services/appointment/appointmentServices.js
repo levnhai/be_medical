@@ -51,14 +51,14 @@ const handleDeleteAppointment = ({ id }) => {
 
       // Xóa thanh toán liên quan nếu có
       await _Payment.findOneAndDelete({ appointmentId: id });
-      
+
       // Xóa lịch hẹn
       await _Appointment.findByIdAndDelete(id);
-      
-      resolve({ 
-        code: 200, 
-        message: 'Xóa lịch hẹn thành công', 
-        status: true 
+
+      resolve({
+        code: 200,
+        message: 'Xóa lịch hẹn thành công',
+        status: true,
       });
     } catch (error) {
       reject(error);

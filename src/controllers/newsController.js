@@ -1,27 +1,27 @@
 const mongoose = require('mongoose');
 const NewsPost = require('../models/NewsPost');
 const CategoryNews = require('../models/CategoryNews');
-const newService =  require('../services/newService')
+const newService = require('../services/newService');
 
 class newController {
   // get all post
   async getAllPosts(req, res) {
-      const result = await newService.handleGetAllPosts();
-      return res.status(result.code).json({
-        result
-      });
+    const result = await newService.handleGetAllPosts();
+    return res.status(result.code).json({
+      result,
+    });
   }
   // get all post admin
   async getAllPostsAdmin(req, res) {
     try {
       const result = await newService.handleGetAllPostsAdmin();
       return res.status(result.code).json({
-        result
+        result,
       });
     } catch (error) {
       return res.status(500).json({
         message: 'Lỗi hệ thống',
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -30,85 +30,81 @@ class newController {
       if (req.user.role !== 'doctor') {
         return res.status(403).json({
           message: 'Không có quyền truy cập',
-          status: false
+          status: false,
         });
       }
-  
+
       const result = await newService.handleGetPostsByAuthor(req.user.modelId, 'Doctor');
       return res.status(result.code).json({
-        result
+        result,
       });
     } catch (error) {
       return res.status(500).json({
         message: 'Lỗi hệ thống',
-        error: error.message
+        error: error.message,
       });
     }
   }
   // Add this to newController.js
-async getHospitalAndDoctorPosts(req, res) {
-  try {
-    if (req.user.role !== 'hospital_admin') {
-      return res.status(403).json({
-        message: 'Không có quyền truy cập',
-        status: false
+  async getHospitalAndDoctorPosts(req, res) {
+    try {
+      if (req.user.role !== 'hospital_admin') {
+        return res.status(403).json({
+          message: 'Không có quyền truy cập',
+          status: false,
+        });
+      }
+
+      const result = await newService.handleGetHospitalAndDoctorsPosts(req.user.modelId);
+      return res.status(result.code).json({
+        result,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Lỗi hệ thống',
+        error: error.message,
       });
     }
-    
-    const result = await newService.handleGetHospitalAndDoctorsPosts(req.user.modelId);
-    return res.status(result.code).json({
-      result
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: 'Lỗi hệ thống',
-      error: error.message
-    });
   }
-}
-   // get post by id
-   async getPostById(req, res) {
+  // get post by id
+  async getPostById(req, res) {
     const postId = req.params.id;
-    if(!postId) {
+    if (!postId) {
       return res.status(400).json({ message: 'Lấy dữ liệu thất bại', status: false });
-    }
-    else {
+    } else {
       const result = await newService.handleGetPostById(postId);
       return res.status(result.code).json({
-        result
+        result,
       });
     }
   }
   async createPost(req, res) {
     try {
-      console.log('Full Request User:', req.user);
-      console.log('Request Body:', req.body);
-      
       const postData = req.body;
-      
+
       // Validate required fields
       if (!postData.title || !postData.content || !postData.category || !postData.imageUrl) {
         return res.status(400).json({
           message: 'Thiếu thông tin bắt buộc',
-          status: false
+          status: false,
         });
       }
-      
+
       // Extra safety checks
       if (!req.user || !req.user.modelId) {
         return res.status(401).json({
           message: 'Thông tin người dùng không hợp lệ',
-          status: false
+          status: false,
         });
       }
-      
+
       // Use information from req.user attached in middleware
       postData.author = {
         _id: req.user.modelId,
-        fullName: req.user.fullName
+        fullName: req.user.fullName,
       };
       postData.authorModel = req.user.model;
-      
+
       const result = await newService.handleCreatePost(postData);
       return res.status(result.code).json({ result });
     } catch (error) {
@@ -117,74 +113,74 @@ async getHospitalAndDoctorPosts(req, res) {
         message: 'Lỗi server',
         status: false,
         error: error.message,
-        errorStack: error.stack
+        errorStack: error.stack,
       });
     }
   }
   // Update post
   async updatePost(req, res) {
     try {
-        const postId = req.params.id;
-        const updateData = req.body;
+      const postId = req.params.id;
+      const updateData = req.body;
 
-        if (!postId) {
-            return res.status(400).json({
-                message: 'ID bài viết không được để trống',
-                status: false
-            });
-        }
-
-        const result = await newService.handleUpdatePost(postId, updateData);
-        return res.status(result.code).json({ result });
-    } catch (error) {
-        return res.status(500).json({
-            message: 'Lỗi server',
-            status: false,
-            error: error.message
+      if (!postId) {
+        return res.status(400).json({
+          message: 'ID bài viết không được để trống',
+          status: false,
         });
+      }
+
+      const result = await newService.handleUpdatePost(postId, updateData);
+      return res.status(result.code).json({ result });
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Lỗi server',
+        status: false,
+        error: error.message,
+      });
     }
   }
-   // Delete post
+  // Delete post
   async deletePost(req, res) {
     try {
-        const postId = req.params.id;
-        if (!postId) {
-            return res.status(400).json({
-                message: 'ID bài viết không được để trống',
-                status: false
-            });
-        }
-
-        const result = await newService.handleDeletePost(postId);
-        return res.status(result.code).json({ result });
-    } catch (error) {
-        return res.status(500).json({
-            message: 'Lỗi server',
-            status: false,
-            error: error.message
+      const postId = req.params.id;
+      if (!postId) {
+        return res.status(400).json({
+          message: 'ID bài viết không được để trống',
+          status: false,
         });
+      }
+
+      const result = await newService.handleDeletePost(postId);
+      return res.status(result.code).json({ result });
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Lỗi server',
+        status: false,
+        error: error.message,
+      });
     }
   }
 
   // Get posts by category slug
   async getPostsByCategory(req, res) {
     try {
-        const categorySlug = req.params.slug;
-        if (!categorySlug) {
-            return res.status(400).json({
-                message: 'Slug danh mục không được để trống',
-                status: false
-            });
-        }
-
-        const result = await newService.handleGetPostsByCategory(categorySlug);
-        return res.status(result.code).json({ result });
-    } catch (error) {
-        return res.status(500).json({
-            message: 'Lỗi server',
-            status: false,
-            error: error.message
+      const categorySlug = req.params.slug;
+      if (!categorySlug) {
+        return res.status(400).json({
+          message: 'Slug danh mục không được để trống',
+          status: false,
         });
+      }
+
+      const result = await newService.handleGetPostsByCategory(categorySlug);
+      return res.status(result.code).json({ result });
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Lỗi server',
+        status: false,
+        error: error.message,
+      });
     }
   }
   async getRelatedNews(req, res) {
@@ -193,17 +189,17 @@ async getHospitalAndDoctorPosts(req, res) {
       if (!postId) {
         return res.status(400).json({
           message: 'ID bài viết không được để trống',
-          status: false
+          status: false,
         });
       }
-  
+
       const result = await newService.handleGetRelatedNews(postId);
       return res.status(result.code).json({ result });
     } catch (error) {
       return res.status(500).json({
         message: 'Lỗi server',
         status: false,
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -215,14 +211,13 @@ async getHospitalAndDoctorPosts(req, res) {
       return res.status(500).json({
         message: 'Lỗi server',
         status: false,
-        error: error.message
+        error: error.message,
       });
     }
   }
 }
 
 module.exports = new newController();
-
 
 // exports.createPost = async (req, res) => {
 //   try {
@@ -338,9 +333,7 @@ module.exports = new newController();
 //   }
 // };
 
-
-
-  // exports.getPostById = async (req, res) => {
+// exports.getPostById = async (req, res) => {
 //   try {
 //     const post = await NewsPost.findById(req.params.id);
 //     if (!post) {
@@ -351,6 +344,3 @@ module.exports = new newController();
 //     res.status(500).json({ message: err.message });
 //   }
 // };
-
-
-

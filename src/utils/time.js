@@ -8,4 +8,13 @@ function isOverlapping({ date, hour1, hour2 }) {
   return start1 < end2 && start2 < end1; // Trùng lặp nếu thời gian chồng lên nhau
 }
 
-module.exports = { isOverlapping };
+// get hour/minutes
+function extractTime(dateTimeString) {
+  const date = new Date(dateTimeString);
+  const hours = date.getUTCHours();
+  const minutes = date.getMinutes();
+  const formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+  return formattedTime;
+}
+
+module.exports = { isOverlapping, extractTime };

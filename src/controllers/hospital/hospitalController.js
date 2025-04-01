@@ -9,12 +9,19 @@ class HospitalController {
     });
   }
 
+  async getHospital(req, res, next) {
+    const hospitalId = req.params.hospitalId;
+    let result = await HospitalServices.handleGetHospital(hospitalId);
+    return res.status(result.code).json({
+      result,
+    });
+  }
+
   // get hospital by type
   async getHospitalByType(req, res, next) {
     const type = req.body?.type;
     const search = req.body?.search;
     let result = await HospitalServices.handleGetHospitalByType({ type, search });
-    console.log('check hospital status', result);
     return res.status(result.code).json({
       result,
     });
@@ -24,7 +31,6 @@ class HospitalController {
   async getCountHospitalByType(req, res, next) {
     const search = req.body?.search;
     let result = await HospitalServices.handleGetCountHospitalByType(search);
-    console.log('check hospital status', result);
     return res.status(result.code).json({
       result,
     });
@@ -44,7 +50,6 @@ class HospitalController {
     const hospitalId = req.params.hospitalId;
     const formData = req.body;
 
-    console.log('cheeck formData', formData);
     let result = await HospitalServices.handleEditHospital(hospitalId, formData);
     return res.status(result.code).json({
       result,

@@ -46,8 +46,6 @@ const handleCreateDoctor = (formData) => {
         },
       ];
 
-      console.log('check address', address);
-
       const isCheckPhoneExist = await isCheckPhoneExists(phoneNumber);
       if (isCheckPhoneExist) {
         return resolve({ code: 200, message: 'Số điện thoại đã tồn tại', status: false });
@@ -94,8 +92,6 @@ const handleCreateDoctor = (formData) => {
 
       await session.commitTransaction();
       session.endSession();
-
-      console.log('check doctor', doctor);
 
       resolve({ code: 200, message: 'Tạo người dùng thành công', status: true, doctor });
     } catch (error) {
@@ -196,7 +192,6 @@ const handleUpdateDoctor = (doctorId, updateData) => {
       // Kiểm tra số điện thoại mới có trùng với bác sĩ khác không
       if (phoneNumber !== existingDoctor.phoneNumber) {
         const isPhoneExists = await isCheckPhoneExists(phoneNumber);
-        console.log('is checkPhoneExists', isPhoneExists);
         if (isPhoneExists) {
           resolve({
             code: 200,
@@ -304,7 +299,6 @@ const handleGetDoctorByHospitalAndDoctor = ({ hospitalId, doctorId }) => {
         query.hospital = hospitalId;
       }
 
-      console.log('check query: ', query);
       const data = await _Doctor.find(query).populate('hospital').populate('specialty');
       resolve({
         code: 200,

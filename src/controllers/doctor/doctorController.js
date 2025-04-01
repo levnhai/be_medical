@@ -4,7 +4,6 @@ class DoctorController {
   async handleCreateDoctor(req, res, next) {
     {
       let { formData } = req.body;
-      console.log('check formData', formData);
       const result = await DoctorServices.handleCreateDoctor(formData);
       return res.status(result.code).json({
         result,
@@ -72,7 +71,6 @@ class DoctorController {
   async handleGetDoctorByHospitalAndDoctor(req, res, next) {
     try {
       const { hospitalId, doctorId } = req.body;
-      console.log('check hospitalOnly', hospitalId);
       const result = await DoctorServices.handleGetDoctorByHospitalAndDoctor({ hospitalId, doctorId });
       return res.status(result.code).json({
         result,

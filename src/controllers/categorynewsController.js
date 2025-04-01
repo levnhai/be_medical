@@ -27,8 +27,6 @@ exports.getCategoryById = async (req, res) => {
 // Tạo mới thể loại
 exports.createCategory = async (req, res) => {
   try {
-    console.log('Request body:', req.body);
-
     const formData = req.body.formData || {};
     const { name, description } = formData;
     let { status } = formData;
@@ -64,9 +62,7 @@ exports.updateCategory = async (req, res) => {
 
     const updateFields = { name, description, status, updatedAt: new Date() };
 
-    Object.keys(updateFields).forEach(
-      (key) => updateFields[key] === undefined && delete updateFields[key]
-    );
+    Object.keys(updateFields).forEach((key) => updateFields[key] === undefined && delete updateFields[key]);
 
     const updatedCategory = await CategoryNews.findByIdAndUpdate(id, updateFields, { new: true });
 

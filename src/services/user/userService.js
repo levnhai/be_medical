@@ -124,12 +124,10 @@ const handleCreateUser = (formData) => {
 
       const isCheckPhoneExist = await isCheckPhoneExists(phoneNumber);
       if (isCheckPhoneExist) {
-        console.log('hải lê');
         return resolve({ code: 200, message: 'Số điện thoại đã tồn tại', status: false });
       }
-      console.log('lỗi');
 
-      if (password !== reEnterPassword) { 
+      if (password !== reEnterPassword) {
         return resolve({ code: 200, message: 'Nhập mật khẩu không trùng khớp', status: false });
       }
 

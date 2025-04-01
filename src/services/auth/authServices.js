@@ -19,9 +19,7 @@ const handleLoginAdmin = ({ phoneNumber, password }) => {
   return new Promise(async (resolve, reject) => {
     try {
       if (phoneNumber && password) {
-        // console.log('check phone number', phoneNumber);
         const account = await _Account.findOne({ phoneNumber });
-        // console.log('check  account', account);
         let userData = {};
         switch (account.role) {
           case 'system_admin':
@@ -36,7 +34,6 @@ const handleLoginAdmin = ({ phoneNumber, password }) => {
             if (!hospital) {
               resolve({ code: 200, message: 'Tài khoản không tồn tại hoặc sai thông tin đăng nhập', status: false });
             }
-            console.log('check hospital', hospital);
             if (!hospital?.renewalStatus) {
               resolve({
                 code: 200,
@@ -51,7 +48,6 @@ const handleLoginAdmin = ({ phoneNumber, password }) => {
             if (!doctor) {
               resolve({ code: 200, message: 'Tài khoản không tồn tại hoặc sai thông tin đăng nhập', status: false });
             }
-            console.log('check doctor', doctor);
             if (!doctor?.hospital?.renewalStatus) {
               resolve({
                 code: 200,
@@ -88,14 +84,12 @@ const handleSingIn = ({ phoneNumber, password }) => {
         let userData = {};
 
         const account = await _Account.findOne({ phoneNumber, role: 'patient' });
-        console.log('check access', account);
         if (!account) {
           resolve({ code: 200, message: 'Tài khoản không tồn tại', status: false });
         } else {
           userData = await _User.findOne({ accountId: account.id });
         }
 
-        console.log('check 1 ', userData);
         // if (account.role === 'patient') {
         //   userData = await _User.findOne({ accountId: account.id });
         // } else {
@@ -122,8 +116,6 @@ const handleCheckPhoneExists = (phoneNumber) => {
         phoneNumber,
         role: 'patient',
       });
-
-      console.log('chekc isCheckPhoneExists', isCheckPhoneExists);
 
       if (isCheckPhoneExists) {
         resolve({ code: 200, message: 'Số điện thoại đã tồn tại', exists: true });
@@ -194,8 +186,6 @@ const handleSingUp = (formData) => {
         phoneNumber,
         role: 'patient',
       });
-
-      console.log('check checkPhoneExists', checkPhoneExists);
 
       // if (checkPhoneExists && checkPhoneExists.role === 'patient') {
       //   resolve({ code: 200, message: 'Số điện thoại đã tồn tại', status: false });
@@ -270,7 +260,6 @@ const handleSingUp = (formData) => {
 const handleForgotPassword = ({ phoneNumber, password, reEnterPassword }) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log('check form data: ', phoneNumber, password, reEnterPassword);
       if (password === reEnterPassword) {
         const account = await _Account.findOne({ phoneNumber });
         if (!account) {

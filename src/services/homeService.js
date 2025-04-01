@@ -38,7 +38,6 @@ const handleLogin = () => {
 // handle Send otp input
 const handleSendotpInput = (phoneNumber) => {
   return new Promise(async (resolve, reject) => {
-    console.log('check phoneNumber', phoneNumber);
     try {
       const randomOtp = generateOTP();
       if (randomOtp) {

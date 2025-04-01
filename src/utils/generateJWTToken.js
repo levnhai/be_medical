@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 function generateJWTToken({ account, userData }) {
-  console.log('check userData', userData);
   const payload = {
     accountId: account._id,
     role: account.role,

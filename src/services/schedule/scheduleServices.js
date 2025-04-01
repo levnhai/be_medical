@@ -15,8 +15,6 @@ const handleCreateSchedule = (formData) => {
         price,
       }));
 
-      console.log('check convertedHours', convertedHours);
-
       // Hàm kiểm tra giờ bị trùng
       const isOverlapping = (hour1, hour2) => {
         return hour1.start < hour2.end && hour2.start < hour1.end;
@@ -53,7 +51,6 @@ const handleCreateSchedule = (formData) => {
 const handleGetSchedule = ({ userLogin, role }) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log('cheeck userLogin, role ', userLogin, role);
       let data = [];
       if (role === 'hospital_admin') {
         data = await _Schedule.find({ hospital: userLogin }).populate('doctor');
@@ -82,17 +79,13 @@ const updateBookingStatus = async (doctorId, date, hourId, isBooked) => {
   try {
     const formattedDate = new Date(date + 'T00:00:00.000Z');
     const schedule = await _Schedule.findOne({ doctor: doctorId, date: formattedDate, 'hours._id': hourId });
-    console.log('check schedule', schedule);
-    console.log('check hourId', hourId);
 
     if (!schedule) {
-      console.log('hải lê');
       return { success: false, message: 'Lịch khám không tồn tại' };
     }
 
     const hourIndex = schedule.hours.findIndex((hour) => hour._id.toString() === hourId);
 
-    console.log('check hourIndex', hourIndex);
     if (hourIndex === -1) {
       return { success: false, message: 'Khung giờ không tồn tại' };
     }

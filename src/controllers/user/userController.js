@@ -12,7 +12,6 @@ class userController {
   // handle delete user
   async handleDeleteUser(req, res) {
     const userId = req.body.id;
-    console.log('check user', userId);
     if (!userId)
       return res.status(401).json({
         code: 401,

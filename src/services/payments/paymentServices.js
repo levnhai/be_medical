@@ -15,8 +15,6 @@ const handleCreateAppointment = (formData) => {
       const { patientId, doctor, hospital, date, hours, price, status, paymentStatus, paymentMethod, orderId } =
         formData;
 
-      console.log('chec hours', hours);
-
       await emailServices.handleSendSimpleEmail({ formData });
       await scheduleServices.updateBookingStatus(doctor?.id, date, hours?.timeId, true);
       const appointment = await _Appointment.create({
@@ -87,8 +85,6 @@ const handleGetAppointmentByUserId = (patientId) => {
 const createPaymentUrl = ({ orderId, amount, orderInfo, ipAddr }) => {
   return new Promise((resolve, reject) => {
     try {
-      console.log('check tham số đầu vào', orderId, amount, orderInfo, ipAddr);
-      console.log('check tham số đầu vào 2', process.env.VNP_HASH_SECRET);
       const date = new Date();
       const createDate = date.toISOString().slice(0, 19).replace(/[-T:]/g, '');
       const orderType = 'billpayment';
@@ -115,13 +111,11 @@ const createPaymentUrl = ({ orderId, amount, orderInfo, ipAddr }) => {
 
       // Tạo chữ ký
       const signData = querystring.stringify(vnp_Params);
-      console.log('check signData', signData);
       const hmac = crypto.createHmac('sha512', process.env.VNP_HASHSECRET);
       vnp_Params['vnp_SecureHash'] = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
 
       const paymentUrl = `${process.env.VNP_URL}?${querystring.stringify(vnp_Params)}`;
 
-      console.log('check payment url', paymentUrl);
       resolve(paymentUrl);
     } catch (error) {
       reject(error);

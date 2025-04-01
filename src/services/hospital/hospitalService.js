@@ -18,6 +18,20 @@ const handleGetAllHospital = () => {
   });
 };
 
+const handleGetHospital = (hospitalId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const data = await _Hospital.find({ _id: hospitalId }).select('-image').populate({
+        path: 'accountId',
+        select: '-password -role',
+      });
+      resolve({ code: 200, message: 'Lấy dữ liệu thành công', status: true, total: data.length, data });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 // handle get hospital by type
 const handleGetHospitalByType = ({ type, search }) => {
   return new Promise(async (resolve, reject) => {
@@ -55,7 +69,6 @@ const handleDeleteHospital = (hospitalId) => {
 const handleGetCountHospitalByType = (search) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log('check search', search);
       let searchQuery = {};
       if (search) {
         searchQuery.fullName = { $regex: new RegExp('.*' + search, 'i') };
@@ -182,7 +195,6 @@ const handleCreateHospital = (formData) => {
       // });
 
       // await hospital.save({ session });
-      console.log('check hopsial', hospital);
       await session.commitTransaction();
       session.endSession();
       resolve({ code: 200, message: 'Thêm bệnh viện thành công', status: true, hospital });
@@ -271,4 +283,5 @@ module.exports = {
   handleGetCountHospitalByType,
   handleEditHospital,
   handleDeleteHospital,
+  handleGetHospital,
 };

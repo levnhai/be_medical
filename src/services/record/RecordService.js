@@ -94,10 +94,9 @@ const handleDeleteRecord = (recordId) => {
   });
 };
 
-const handleUpdateRecord = (recordId, formData ) => {
+const handleUpdateRecord = (recordId, formData) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log('formData', formData);
       const {
         fullName,
         phoneNumber,
@@ -118,7 +117,6 @@ const handleUpdateRecord = (recordId, formData ) => {
 
       const existingRecord = await _Record.findById(recordId);
 
-      console.log('check existingRecord', fullName);
       if (!existingRecord) {
         resolve({
           code: 404,
@@ -153,8 +151,6 @@ const handleUpdateRecord = (recordId, formData ) => {
         },
         { new: true },
       );
-
-      console.log('check updateRecord', updateRecord);
 
       resolve({
         code: 200,
