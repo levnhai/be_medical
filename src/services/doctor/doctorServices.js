@@ -274,7 +274,6 @@ const handleGetDoctorByHospital = (hospitalId) => {
       console.time('response in');
       const data = await _Doctor.find({ hospital: hospitalId }).populate('specialty').populate('hospital').lean();
 
-      console.timeEnd('response in');
       resolve({
         code: 200,
         message: 'Lấy dữ liệu thành công',

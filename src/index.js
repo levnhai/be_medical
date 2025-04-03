@@ -61,10 +61,7 @@ app.use(cookieParser());
 // Setup WebSocket (Socket.io)
 socketSetup(server);
 
-// router init
-// app.listen(port, () => {
-//   console.log(`App listening on port ${port}`);
-// });
+
 server.listen(port, () => {
   console.log(` Server running on http://localhost:${port}`);
 });
