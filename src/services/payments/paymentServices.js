@@ -9,76 +9,71 @@ const scheduleServices = require('../schedule/scheduleServices');
 const { notifyDoctor } = require('../../socket');
 
 // thanh toán tại phòng khám
-const handleCreateAppointment = (formData) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const { patientId, doctor, hospital, date, hours, price, status, paymentStatus, paymentMethod, orderId } =
-        formData;
+const handleCreateAppointment = async (formData) => {
+  try {
+    const { patientId, doctor, hospital, date, hours, price, status, paymentStatus, paymentMethod, orderId } = formData;
 
-      await emailServices.handleSendSimpleEmail({ formData });
-      await scheduleServices.updateBookingStatus(doctor?.id, date, hours?.timeId, true);
-      const appointment = await _Appointment.create({
-        record: patientId?._id,
-        patientId: patientId?.userId,
-        doctor: doctor?.id,
-        hospital: hospital?.id,
-        date,
-        hours,
-        price,
-        paymentStatus,
-        paymentMethod,
-        orderId,
-      });
+    await emailServices.handleSendSimpleEmail({ formData });
+    await scheduleServices.updateBookingStatus(doctor?.id, date, hours?.timeId, true);
+    const appointment = await _Appointment.create({
+      record: patientId?._id,
+      patientId: patientId?.userId,
+      doctor: doctor?.id,
+      hospital: hospital?.id,
+      date,
+      hours,
+      price,
+      paymentStatus,
+      paymentMethod,
+      orderId,
+    });
 
-      // Gửi sự kiện real-time
-      notifyDoctor(doctor?.id, formData);
+    // Gửi sự kiện real-time
+    notifyDoctor(doctor?.id, formData);
 
-      await _Payment.create({
-        appointmentId: appointment._id,
-        orderId,
-        patientId: patientId?.userId,
-        price,
-        paymentMethod,
-        status: paymentMethod === 'cash' ? 'pending' : 'processing',
-      });
-      resolve({ code: 200, message: 'Tạo lịch hẹn thành công', status: true, appointment });
-    } catch (error) {
-      reject(error);
-    }
-  });
+    await _Payment.create({
+      appointmentId: appointment._id,
+      orderId,
+      patientId: patientId?.userId,
+      price,
+      paymentMethod,
+      status: paymentMethod === 'cash' ? 'pending' : 'processing',
+    });
+    return { code: 200, message: 'Tạo lịch hẹn thành công', status: true, appointment };
+  } catch (error) {
+    return { code: 500, message: 'Lỗi máy chủ', status: false, error };
+  }
 };
 
-const handleGetAppointmentByUserId = (patientId) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const data = {
-        pending: [],
-        paid: [],
-        completed: [],
-        canceled: [],
-      };
+const handleGetAppointmentByUserId = async (patientId) => {
+  try {
+    const data = {
+      pending: [],
+      paid: [],
+      completed: [],
+      canceled: [],
+    };
 
-      const appointment = await _Appointment.find({ patientId }).populate('doctor').populate('hospital');
+    const appointment = await _Appointment.find({ patientId }).populate('doctor').populate('hospital');
 
-      appointment.map((item) => {
-        if (item?.status === 'Completed') {
-          data.completed.push(item);
-        } else if (item?.status === 'canceled') {
-          data.canceled.push(item);
-        } else if (item?.status === 'Booked') {
-          if (item?.paymentStatus === 'pending') {
-            data.pending.push(item);
-          } else {
-            data.paid.push(item);
-          }
+    appointment.map((item) => {
+      if (item?.status === 'Completed') {
+        data.completed.push(item);
+      } else if (item?.status === 'canceled') {
+        data.canceled.push(item);
+      } else if (item?.status === 'Booked') {
+        if (item?.paymentStatus === 'pending') {
+          data.pending.push(item);
+        } else {
+          data.paid.push(item);
         }
-      });
+      }
+    });
 
-      resolve({ code: 200, message: 'Lấy dữ liệu thành công', status: true, data });
-    } catch (error) {
-      reject(error);
-    }
-  });
+    return { code: 200, message: 'Lấy dữ liệu thành công', status: true, data };
+  } catch (error) {
+    return { code: 500, message: 'Lỗi máy chủ', status: false, error };
+  }
 };
 
 // Hàm tạo URL thanh toán VNPay

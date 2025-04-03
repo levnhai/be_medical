@@ -1,76 +1,71 @@
 const _Schedule = require('../../models/schedules');
 
-const handleCreateSchedule = (formData) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const { doctorId, hospitalId, date, hours } = formData;
+const handleCreateSchedule = async (formData) => {
+  try {
+    const { doctorId, hospitalId, date, hours } = formData;
 
-      // Lấy tất cả lịch làm việc của bác sĩ trong ngày
-      const existingSchedules = await _Schedule.find({ doctor: doctorId, date });
+    // Lấy tất cả lịch làm việc của bác sĩ trong ngày
+    const existingSchedules = await _Schedule.find({ doctor: doctorId, date });
 
-      // Chuyển đổi start và end sang kiểu Date (nếu cần)
-      const convertedHours = hours.map(({ start, end, price }) => ({
-        start: new Date(`${date}T${start}:00Z`),
-        end: new Date(`${date}T${end}:00Z`),
-        price,
-      }));
+    // Chuyển đổi start và end sang kiểu Date (nếu cần)
+    const convertedHours = hours.map(({ start, end, price }) => ({
+      start: new Date(`${date}T${start}:00Z`),
+      end: new Date(`${date}T${end}:00Z`),
+      price,
+    }));
 
-      // Hàm kiểm tra giờ bị trùng
-      const isOverlapping = (hour1, hour2) => {
-        return hour1.start < hour2.end && hour2.start < hour1.end;
-      };
+    // Hàm kiểm tra giờ bị trùng
+    const isOverlapping = (hour1, hour2) => {
+      return hour1.start < hour2.end && hour2.start < hour1.end;
+    };
 
-      for (const existingSchedule of existingSchedules) {
-        for (const existingHour of existingSchedule.hours) {
-          for (const newHour of convertedHours) {
-            if (isOverlapping(existingHour, newHour)) {
-              resolve({ code: 400, message: 'Khung giờ bị trùng', status: false });
-              return;
-            }
+    for (const existingSchedule of existingSchedules) {
+      for (const existingHour of existingSchedule.hours) {
+        for (const newHour of convertedHours) {
+          if (isOverlapping(existingHour, newHour)) {
+            return { code: 400, message: 'Khung giờ bị trùng', status: false };
           }
         }
       }
-
-      // Lặp qua mảng hours và lưu
-      const workingHours = convertedHours.map((hour) => ({
-        doctor: doctorId,
-        hospital: hospitalId,
-        date,
-        hours: hour,
-      }));
-
-      const schedule = await _Schedule.insertMany(workingHours);
-
-      resolve({ code: 200, message: 'Thêm thành công', status: true, schedule });
-    } catch (error) {
-      reject(error);
     }
-  });
+
+    // Lặp qua mảng hours và lưu
+    const workingHours = convertedHours.map((hour) => ({
+      doctor: doctorId,
+      hospital: hospitalId,
+      date,
+      hours: hour,
+    }));
+
+    const schedule = await _Schedule.insertMany(workingHours);
+
+    return { code: 200, message: 'Thêm thành công', status: true, schedule };
+  } catch (error) {
+    return { code: 500, message: 'Lỗi máy chủ', status: false, error };
+  }
 };
 
-const handleGetSchedule = ({ userLogin, role }) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      let data = [];
-      if (role === 'hospital_admin') {
-        data = await _Schedule.find({ hospital: userLogin }).populate('doctor');
-      } else if (role === 'doctor') {
-        data = await _Schedule.find({ doctor: userLogin }).populate('doctor');
-      }
-      resolve({ code: 200, message: 'Lấy dữ liệu thành công', status: true, total: data.length, data });
-    } catch (error) {
-      reject(error);
+const handleGetSchedule = async ({ userLogin, role }) => {
+  try {
+    let data = [];
+    if (role === 'hospital_admin') {
+      data = await _Schedule.find({ hospital: userLogin }).populate('doctor');
+    } else if (role === 'doctor') {
+      data = await _Schedule.find({ doctor: userLogin }).populate('doctor');
     }
-  });
+    return { code: 200, message: 'Lấy dữ liệu thành công', status: true, total: data.length, data };
+  } catch (error) {
+    return { code: 500, message: 'Lỗi máy chủ', status: false, error };
+  }
 };
 
-const handleGetAllScheduleByDoctor = (doctorId) => {
+const handleGetAllScheduleByDoctor = async (doctorId) => {
   return new Promise(async (resolve, reject) => {
     try {
       const data = await _Schedule.find({ doctor: doctorId });
-      resolve({ code: 200, message: 'Lấy dữ liệu thành công', status: true, total: data.length, data });
+      return { code: 200, message: 'Lấy dữ liệu thành công', status: true, total: data.length, data };
     } catch (error) {
-      reject(error);
+      return { code: 500, message: 'Lỗi máy chủ', status: false, error };
     }
   });
 };

@@ -1,4 +1,3 @@
-const homeRouter = require('./home');
 const newsRouter = require('./news');
 const categorynewsRouter = require('./categorynews');
 const registrationRoutes = require('./registration');
@@ -17,7 +16,6 @@ const adminRoutes = require('./admin');
 const dashBoardRoutes = require('./dashboard');
 
 function route(app) {
-  // app.use('/', homeRouter);
   app.use('/news', newsRouter);
   app.use('/categorynews', categorynewsRouter);
   app.use('/registrations', registrationRoutes);
