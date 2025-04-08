@@ -99,7 +99,7 @@ router.post('/payment-momo', async (req, res) => {
   var orderInfo = 'Thanh toán lịch khám bệnh';
   var partnerCode = 'MOMO';
   var redirectUrl = 'http://localhost:3000/user';
-  var ipnUrl = 'https://72ec-2402-800-63ad-a408-d84a-95b1-a74a-aaf2.ngrok-free.app/payment/callback';
+  var ipnUrl = 'https://6ddd-115-75-177-83.ngrok-free.app/payment/callback';
   var requestType = 'payWithMethod';
   var amount = price;
   var orderId = partnerCode + new Date().getTime();
@@ -205,6 +205,7 @@ router.post('/callback', async (req, res) => {
     resultCode = 9000: giao dịch được cấp quyền (authorization) thành công .
     resultCode <> 0: giao dịch thất bại.
    */
+
   const { orderId, resultCode } = req.body;
   const status = resultCode === 0 ? 'paid' : 'pending';
 

@@ -60,14 +60,12 @@ const handleGetSchedule = async ({ userLogin, role }) => {
 };
 
 const handleGetAllScheduleByDoctor = async (doctorId) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const data = await _Schedule.find({ doctor: doctorId });
-      return { code: 200, message: 'Lấy dữ liệu thành công', status: true, total: data.length, data };
-    } catch (error) {
-      return { code: 500, message: 'Lỗi máy chủ', status: false, error };
-    }
-  });
+  try {
+    const data = await _Schedule.find({ doctor: doctorId });
+    return { code: 200, message: 'Lấy dữ liệu thành công', status: true, total: data.length, data };
+  } catch (error) {
+    return { code: 500, message: 'Lỗi máy chủ', status: false, error };
+  }
 };
 
 const updateBookingStatus = async (doctorId, date, hourId, isBooked) => {
