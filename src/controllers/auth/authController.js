@@ -19,9 +19,7 @@ class AuthController {
   async handleSingIn(req, res, next) {
     {
       let { phoneNumber, password } = req.body;
-      console.log('check phone number', phoneNumber);
       const result = await AuthServices.handleSingIn({ phoneNumber, password });
-      console.log('check result', result);
       return res.status(result.code).json({
         result,
       });

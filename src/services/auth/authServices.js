@@ -17,61 +17,60 @@ const otpService = require('../../services/otpService');
 //admin
 const handleLoginAdmin = async ({ phoneNumber, password }) => {
   try {
-    if (phoneNumber && password) {
-      const account = await _Account.findOne({ phoneNumber });
-      let userData = {};
-      switch (account.role) {
-        case 'system_admin':
-          const system_admin = await _Admin.findOne({ accountId: account.id });
-          if (!system_admin) {
-            return { code: 200, message: 'Tài khoản không tồn tại hoặc sai thông tin đăng nhập', status: false };
-          }
-          userData = system_admin;
-          break;
-        case 'hospital_admin':
-          const hospital = await _Hospital.findOne({ accountId: account.id });
-          if (!hospital) {
-            return { code: 200, message: 'Tài khoản không tồn tại hoặc sai thông tin đăng nhập', status: false };
-          }
-          if (!hospital?.renewalStatus) {
-            return {
-              code: 200,
-              message: 'Dịch vụ của bạn đã hết hạn.',
-              status: false,
-            };
-          }
-          userData = hospital;
-          break;
-        case 'doctor':
-          const doctor = await _Doctor.findOne({ accountId: account.id }).populate('hospital');
-          if (!doctor) {
-            return { code: 200, message: 'Tài khoản không tồn tại hoặc sai thông tin đăng nhập', status: false };
-          }
-          if (!doctor?.hospital?.renewalStatus) {
-            return {
-              code: 200,
-              message: 'Dịch vụ của bạn đã hết hạn',
-              status: false,
-            };
-          }
-          userData = doctor;
-          break;
-        default:
-          return { code: 400, message: 'Invalid role', status: false };
-      }
+    if (!phoneNumber || !password) {
+      return { code: 400, message: 'Please fill required fields', status: false };
+    }
+    const account = await _Account.findOne({ phoneNumber });
+    let userData = {};
+    switch (account.role) {
+      case 'system_admin':
+        const system_admin = await _Admin.findOne({ accountId: account.id });
+        if (!system_admin) {
+          return { code: 200, message: 'Tài khoản không tồn tại hoặc sai thông tin đăng nhập', status: false };
+        }
+        userData = system_admin;
+        break;
+      case 'hospital_admin':
+        const hospital = await _Hospital.findOne({ accountId: account.id });
+        if (!hospital) {
+          return { code: 200, message: 'Tài khoản không tồn tại hoặc sai thông tin đăng nhập', status: false };
+        }
+        if (!hospital?.renewalStatus) {
+          return {
+            code: 200,
+            message: 'Dịch vụ của bạn đã hết hạn.',
+            status: false,
+          };
+        }
+        userData = hospital;
+        break;
+      case 'doctor':
+        const doctor = await _Doctor.findOne({ accountId: account.id }).populate('hospital');
+        if (!doctor) {
+          return { code: 200, message: 'Tài khoản không tồn tại hoặc sai thông tin đăng nhập', status: false };
+        }
+        if (!doctor?.hospital?.renewalStatus) {
+          return {
+            code: 200,
+            message: 'Dịch vụ của bạn đã hết hạn',
+            status: false,
+          };
+        }
+        userData = doctor;
+        break;
+      default:
+        return { code: 400, message: 'Invalid role', status: false };
+    }
 
-      const token = generateJWTToken({ account, userData });
-      const isPassword = await bcrypt.compare(password, account.password);
-      // isPassword
-      //   ? return({ code: 200, message: 'Đăng nhập thành công', status: true, token, userData })
-      //   : resolve({ code: 200, message: 'mật khẩu không đúng', status: false });
-      if (isPassword) {
-        return { code: 200, message: 'Đăng nhập thành công', status: true, token, userData };
-      } else {
-        return { code: 200, message: 'mật khẩu không đúng', status: false };
-      }
+    const token = generateJWTToken({ account, userData });
+    const isPassword = await bcrypt.compare(password, account.password);
+    // isPassword
+    //   ? return({ code: 200, message: 'Đăng nhập thành công', status: true, token, userData })
+    //   : resolve({ code: 200, message: 'mật khẩu không đúng', status: false });
+    if (isPassword) {
+      return { code: 200, message: 'Đăng nhập thành công', status: true, token, userData };
     } else {
-      return { code: 200, message: 'Nhập các trường bắt buộc', status: false };
+      return { code: 200, message: 'mật khẩu không đúng', status: false };
     }
   } catch (error) {
     return { code: 500, message: 'Lỗi máy chủ', status: false, error };
@@ -91,12 +90,6 @@ const handleSingIn = async ({ phoneNumber, password }) => {
       } else {
         userData = await _User.findOne({ accountId: account.id });
       }
-
-      // if (account.role === 'patient') {
-      //   userData = await _User.findOne({ accountId: account.id });
-      // } else {
-      //   resolve({ code: 400, message: 'Tài khoản không tồn tại', status: false });
-      // }
       const token = await generateJWTToken({ account, userData });
       const isPassword = await bcrypt.compare(password, account.password);
 
@@ -145,19 +138,23 @@ const handleSendotpInput = async (phoneNumber) => {
   }
 };
 
+debugger;
 // handle verifyOtp
 const handleVerifyOtp = async (phoneNumber, otp) => {
   try {
     const otpHolder = await _Otp.find({ phoneNumber });
+    console.log('🚀 ~ handleVerifyOtp ~ otpHolder:', otpHolder);
     if (!otpHolder.length) {
       return { code: 201, message: 'Hết thời gian nhập', status: false };
     }
 
     // get last otp
     const lastOtp = otpHolder[otpHolder.length - 1];
+    console.log('🚀 ~ handleVerifyOtp ~ lastOtp:', lastOtp);
 
     // check otp
     const invalid = await otpService.verifyOtp({ otp, hashOtp: lastOtp.otp });
+    console.log('🚀 ~ handleVerifyOtp ~ invalid:', invalid);
     if (invalid) {
       await _Otp.deleteMany({ phoneNumber });
       return { code: 201, message: 'Xác thực Thành công!', status: true };

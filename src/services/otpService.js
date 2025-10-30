@@ -20,15 +20,14 @@ const insertOtp = async (phoneNumber, otp) => {
 };
 
 //verify otp
-const verifyOtp = ({ otp, hashOtp }) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const invalid = await bcrypt.compare(otp, hashOtp);
-      return invalid;
-    } catch (error) {
-      return { code: 500, message: 'Lỗi máy chủ', status: false, error };
-    }
-  });
+const verifyOtp = async ({ otp, hashOtp }) => {
+  try {
+    const invalid = await bcrypt.compare(otp, hashOtp);
+    console.log('🚀 ~ verifyOtp ~ invalid:', invalid);
+    return invalid;
+  } catch (error) {
+    return { code: 500, message: 'Lỗi máy chủ', status: false, error };
+  }
 };
 
 module.exports = {
